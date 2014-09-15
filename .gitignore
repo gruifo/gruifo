@@ -1,15 +1,35 @@
 *.class
 
+# eclipse project files
+.project
+.classpath
+
 # Package Files #
 *.jar
 *.war
+
+# logfiles
+*.log
+
+# OS generated files #
+######################
+Thumbs.db
 
 # gwt caches and compiled units #
 war/gwt_bree/
 gwt-unitCache/
 
-# boilerplate generated classes #
-.apt_generated/
+# Eclipse files and generated file     #
+######################
+/.metadata/
+.settings/
+.project
+.classpath
+.checkstyle
+.pmd
+.ruleset
+.apt_generated
+.externalToolBuilders
 
 # more caches and things from deploy #
 war/WEB-INF/deploy/
@@ -23,6 +43,8 @@ gwt-unitCache/
 
 #gwt junit compilation files
 www-test/
+/target
 
-#old GWT (1.5) created this dir
-.gwt-tmp/
+# Git merge files    #
+######################
+*.orig
