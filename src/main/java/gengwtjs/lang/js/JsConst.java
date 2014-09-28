@@ -13,20 +13,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package gengwtjs.output;
+package gengwtjs.lang.js;
 
-import gengwtjs.lang.js.JsFile;
+public class JsConst {
 
-/**
- * Generic interface for outputing generated code to file.
- */
-public interface FilePrinter {
+  private final String name;
+  private final JsElement element;
 
-  /**
-   * Prints the java file to a source file. The returned string is written to
-   * file.
-   * @param javaFile file to print
-   * @return String representation of the file.
-   */
-  String printFile(JsFile javaFile);
+  public JsConst(final String name, final JsElement element) {
+    this.name = name;
+    this.element = element;
+  }
+
+  public JsElement getElement() {
+    return element;
+  }
+
+  public String getName() {
+    return name;
+  }
 }

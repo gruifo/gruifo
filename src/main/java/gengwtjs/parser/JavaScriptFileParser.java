@@ -94,7 +94,6 @@ public class JavaScriptFileParser implements NodeVisitor {
       visitEnum(((PropertyGet) node.getLeft()).toSource(), node.getJsDoc(),
           node.getRight());
       // TODO functions calling other functions.
-
       // LOG.debug("Node found: {} in file: {}", ((PropertyGet)
       // node.getLeft()).toSource(), fileName);
     }

@@ -52,6 +52,10 @@ public class JavaScriptDocParser {
    */
   private static final String CONSTRUCTOR = "constructor";
   /**
+   * Annotation: @define
+   */
+  private static final String DEFINE = "define";
+  /**
    * Annotation: @deprecated
    */
   private static final String DEPRECATED = "deprecated";
@@ -167,6 +171,9 @@ public class JavaScriptDocParser {
       case CONSTRUCTOR:
         doc.setConstructor();
         break;
+      case DEFINE:
+        LOG.error("TODO define");
+        break;
       case ENUM:
         doc.setEnum();
         break;
@@ -243,7 +250,7 @@ public class JavaScriptDocParser {
   private String parseTemplateType(final String line, final String fileName) {
     final Pattern pattern = Pattern.compile("@template +([^ ]+)");
     final Matcher matcher = pattern.matcher(line);
-    return matcher.find() ? matcher.group(1) : "";
+    return matcher.find() ? matcher.group(1).trim() : "";
   }
 
   private String convertComment(final String comment) {
@@ -253,7 +260,7 @@ public class JavaScriptDocParser {
   private JsType parseType(final String line, final String fileName) {
     final Pattern pattern = Pattern.compile("\\{([^\\}]+)\\}");
     final Matcher matcher = pattern.matcher(line);
-    return matcher.find() ? jsTypeParser.parseType(matcher.group(1)) : null;
+    return matcher.find() ? jsTypeParser.parseType(matcher.group(1).trim()) : null;
   }
 
   private JsParam parseParam(final String line, final String fileName) {
@@ -261,8 +268,8 @@ public class JavaScriptDocParser {
     final Matcher matcher = pattern.matcher(line);
     final JsParam param = new JsParam();
     if (matcher.find()) {
-      param.setType(jsTypeParser.parseType(matcher.group(1)));
-      param.setName(matcher.group(2));
+      param.setType(jsTypeParser.parseType(matcher.group(1).trim()));
+      param.setName(matcher.group(2).trim());
       return param;
     } else {
       LOG.error("Parameter could not be parsed, line:{}, file:{}", line, fileName);

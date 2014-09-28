@@ -29,12 +29,12 @@ import java.util.regex.Pattern;
 public class JsTypeParser {
 
   private static final Pattern GENERIC_TYPE_PATTERN =
-      Pattern.compile("([^\\.]+)\\.<(.+?)>");
+      Pattern.compile("(.+?)\\.<(.+)>");
 
-  public JsType parseType(final String type) {
-    final JsType jsType = new JsType(type);
+  public JsType parseType(final String rawType) {
+    final JsType jsType = new JsType(rawType);
     final String pType =
-        parseVarArgs(jsType, parseNull(jsType, parseOptional(jsType, type)));
+        parseVarArgs(jsType, parseNull(jsType, parseOptional(jsType, rawType)));
     final String[] pTypes = pType.split("\\|");
     for (final String sType : pTypes) {
       if (!parseAsFunction(jsType, sType))

@@ -47,20 +47,20 @@ class Controller {
 
   private static final Logger LOG = LoggerFactory.getLogger(Controller.class);
 
-  private List<String> srcPaths;
-  private String outputPath;
+  private List<File> srcPaths;
+  private File outputPath;
 
   public Controller() {
   }
 
-  public Controller(final List<String> srcPaths, final String outputPath) {
+  public Controller(final List<File> srcPaths, final File outputPath) {
     this.srcPaths = srcPaths;
     this.outputPath = outputPath;
   }
 
   void run(final FilePrinter printer) {
     final List<File> files = new ArrayList<>();
-    for (final String srcPath : srcPaths) {
+    for (final File srcPath : srcPaths) {
       scanJsFiles(files, srcPath);
     }
     for (final File file : files) {
@@ -74,13 +74,16 @@ class Controller {
     }
   }
 
-  void scanJsFiles(final List<File> files, final String srcPath) {
-    final File folder = new File(srcPath);
-    for (final File file : folder.listFiles()) {
-      if (file.isDirectory()) {
-        scanJsFiles(files, file.getPath());
-      } else if (file.getPath().endsWith(JAVA_SCRIPT_EXT)) {
-        files.add(file);
+  void scanJsFiles(final List<File> files, final File srcPath) {
+    if (srcPath.isFile()) {
+      files.add(srcPath);
+    } else {
+      for (final File file : srcPath.listFiles()) {
+        if (file.isDirectory()) {
+          scanJsFiles(files, file);
+        } else if (file.getPath().endsWith(JAVA_SCRIPT_EXT)) {
+          files.add(file);
+        }
       }
     }
   }
@@ -108,7 +111,7 @@ class Controller {
     for (final JsFile jsFile : files) {
       final String[] split = jsFile.getPackageName().split("\\.");
       if (split.length > 0 && filesMap.containsKey(split[split.length - 1])) {
-        filesMap.get(split[split.length - 1]).addSubJsFile(jsFile);
+        //        filesMap.get(split[split.length - 1]).addSubJsFile(jsFile);
         //      } else if (split.length > 1 && filesMap.containsKey(split[split.length - 2])
         //          && "prototype".equals(split[split.length - 1])) {
         //        filesMap.get(split[split.length - 2]).addSubJFile(javaFile);
@@ -120,10 +123,10 @@ class Controller {
   }
 
   void writeFiles(final FilePrinter printer, final Collection<JsFile> jsFiles,
-      final String outputPath) throws IOException {
+      final File outputPath) throws IOException {
     for (final JsFile javaFile : jsFiles) {
       final String packagePath = javaFile.getPackageName().replace('.', '/');
-      final File path = new File(outputPath + '/' + packagePath);
+      final File path = new File(outputPath, packagePath);
       path.mkdirs();
       try (final FileWriter writer = new FileWriter(
           new File(path, javaFile.getClassOrInterfaceName() + JAVA_EXT))) {

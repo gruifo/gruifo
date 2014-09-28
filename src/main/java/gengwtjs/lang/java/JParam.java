@@ -13,20 +13,37 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package gengwtjs.output;
+package gengwtjs.lang.java;
 
-import gengwtjs.lang.js.JsFile;
+public class JParam {
 
-/**
- * Generic interface for outputing generated code to file.
- */
-public interface FilePrinter {
+  private final String type;
+  private String name;
+  private boolean _optional;
+  private boolean varargs;
 
-  /**
-   * Prints the java file to a source file. The returned string is written to
-   * file.
-   * @param javaFile file to print
-   * @return String representation of the file.
-   */
-  String printFile(JsFile javaFile);
+  public JParam(final String type, final String name) {
+    this.type = type;
+    this.name = name;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  //  public boolean isOptional() {
+  //    return _optional;
+  //  }
+
+  public boolean isVarargs() {
+    return varargs;
+  }
+
+  public void setName(final String name) {
+    this.name = name;
+  }
 }

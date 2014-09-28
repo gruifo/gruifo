@@ -13,20 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package gengwtjs.output;
+package gengwtjs.lang.java;
 
-import gengwtjs.lang.js.JsFile;
+public class JEnum {
 
-/**
- * Generic interface for outputing generated code to file.
- */
-public interface FilePrinter {
-
-  /**
-   * Prints the java file to a source file. The returned string is written to
-   * file.
-   * @param javaFile file to print
-   * @return String representation of the file.
-   */
-  String printFile(JsFile javaFile);
 }

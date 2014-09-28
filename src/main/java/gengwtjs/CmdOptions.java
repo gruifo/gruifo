@@ -80,28 +80,28 @@ class CmdOptions {
     cmd = parser.parse(options, args);
   }
 
-  public List<String> getSourcePaths() throws FileNotFoundException {
-    final List<String> dirs = new ArrayList<>();
+  public List<File> getSourcePaths() throws FileNotFoundException {
+    final List<File> dirs = new ArrayList<>();
     final String paths = cmd.getOptionValue(SRC_PATH);
     for (final String dir: paths.split(";")) {
-      dirs.add(getDir(dir, SRC_PATH));
+      dirs.add(getPath(dir, SRC_PATH));
     }
     return dirs;
   }
 
-  public String getTargetDir() throws FileNotFoundException {
-    return getDir(cmd.getOptionValue(TARGET_PATH), TARGET_PATH);
+  public File getTargetDir() throws FileNotFoundException {
+    return getPath(cmd.getOptionValue(TARGET_PATH), TARGET_PATH);
   }
 
-  private String getDir(final String dir, final String option)
+  private File getPath(final String path, final String option)
       throws FileNotFoundException {
-    final File file = new File(dir);
+    final File file = new File(path);
 
-    if (!file.exists() || !file.isDirectory()) {
+    if (!file.exists()) {
       throw new FileNotFoundException(
-          dir + " as supplied by -" + option + " does not exist. ");
+          path + " as supplied by -" + option + " does not exist. ");
     }
-    return dir;
+    return file;
   }
 
   public Properties getTypeMappingProperties()
