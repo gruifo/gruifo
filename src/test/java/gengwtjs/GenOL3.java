@@ -19,7 +19,7 @@ public class GenOL3 {
         + OL3_PATH + "ol3/externs/olx.js;"
         + OL3_PATH + "ol3/externs/oli.js";
     final String typeMappingFile =
-        getClass().getResource("type_mapper.properties").getPath().substring(0);
+        getClass().getResource("type_mapper.properties").getPath();
     Main.main(new String[] {"-src", src, "-target", target,
         "-type_mapping", typeMappingFile, });
   }
@@ -30,7 +30,7 @@ public class GenOL3 {
     final String target = GWT_OL3_PATH + "gwt-ol3-jnsi/src/main/java";
     final String src = OL3_PATH + "ol3/src/ol/" + SINGLE_FILE + ".js";
     final String typeMappingFile =
-        getClass().getResource("type_mapper.properties").getPath().substring(0);
+        getClass().getResource("type_mapper.properties").getPath();
     Main.main(new String[] {"-src", src, "-target", target,
         "-type_mapping", typeMappingFile, });
   }
