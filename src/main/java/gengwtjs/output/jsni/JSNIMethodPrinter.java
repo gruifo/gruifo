@@ -26,8 +26,6 @@ class JSNIMethodPrinter {
   public void writeMethods(final StringBuffer buffer, final int indent,
       final JavaFile jFile) {
     for (final JMethod method : jFile.getMethods()) {
-
-      final String prefix = "";
       PrintUtil.indent(buffer, method.getComment(), indent);
       PrintUtil.indent(buffer, indent);
       if (method.isComplex()) {
@@ -47,9 +45,7 @@ class JSNIMethodPrinter {
       writeMethodParam(buffer, method, true);
       buffer.append(") /*-{");
       PrintUtil.nl(buffer);
-      if (prefix.isEmpty()) {
-        writeMethodBody(buffer, indent + 1, method);
-      }
+      writeMethodBody(buffer, indent + 1, method);
       PrintUtil.indent(buffer, indent);
       buffer.append("}-*/;");
       PrintUtil.nl2(buffer);

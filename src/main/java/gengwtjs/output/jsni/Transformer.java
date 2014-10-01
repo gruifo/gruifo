@@ -50,9 +50,14 @@ class Transformer {
         new JClass(jsFile.getPackageName(), jsFile.getClassOrInterfaceName());
     addImports(jFile);
     setExtends(jFile, jsFile);
+    jFile.setClassDescription(jsFile.getElement().getComment());
     for (final JsFile subFile: jsFile.getInnerJFiles()) {
       jFile.addInnerJFile(transform(subFile));
     }
+    if (jsFile.getElement().getTypeDef() instanceof List) {
+      transformFields(jFile, (List<JsParam>) jsFile.getElement().getTypeDef());
+    }
+    transformFields(jFile, jsFile.getFields());
     for(final JsMethod jsMethod: jsFile.getMethods()) {
       if (!ignoreMethod(jsMethod)) {
         final JMethod method = transformMethod(jsMethod);
@@ -85,6 +90,12 @@ class Transformer {
             : transformType(extendsType));
   }
 
+  private void transformFields(final JClass jFile, final List<JsParam> jsFields) {
+    for (final JsParam jsParam : jsFields) {
+      jFile.addField(jsParam.getName(), transformType(jsParam.getTypes()));
+    }
+  }
+
   private boolean ignoreMethod(final JsMethod jsMethod) {
     return ignoreMethods.contains(jsMethod.getMethodName())
         || jsMethod.getElement().isOverride()
@@ -99,8 +110,10 @@ class Transformer {
     jMethod.setComplex(isComplex(jsMethod));
     setReturnType(jsMethod, jMethod);
     for (final JsParam jsParam: jsMethod.getElement().getParams()) {
-      jMethod.addParam(
-          new JParam(transformType(jsParam.getTypes()), jsParam.getName()));
+      final JParam param =
+          new JParam(jsParam.getName(), transformType(jsParam.getTypes()));
+      param.setOptional(jsParam.getTypes().isOptional());
+      jMethod.addParam(param);
     }
     return jMethod;
   }

@@ -32,6 +32,7 @@ public class JSNIPrinter implements FilePrinter {
   private final TypeMapper typeMapper = TypeMapper.INSTANCE;
   private final Transformer transformer = new Transformer();
   private final JSNIMethodPrinter mPrinter = new JSNIMethodPrinter();
+  private final JSNIFieldPrinter fPrinter = new JSNIFieldPrinter();
 
   @Override
   public String printFile(final JsFile jsFile) {
@@ -39,11 +40,18 @@ public class JSNIPrinter implements FilePrinter {
   }
 
   public String printFile(final JavaFile jFile) {
-    int indent = 0;
+    final int indent = 0;
     final StringBuffer buffer = new StringBuffer();
     buffer.append(jFile.getHeaderComment());
     writePackageName(buffer, jFile.getPackageName());
     writeImports(buffer, jFile.getImports());
+    jFile.setStatic(false); //FIXME setting static should not be done here
+    printJavaFile(jFile, indent, buffer);
+    return buffer.toString();
+  }
+
+  private void printJavaFile(final JavaFile jFile, int indent,
+      final StringBuffer buffer) {
     writeClass(buffer, (JClass) jFile, indent);
     indent++;
     writeEnumFields(buffer, jFile.getPackageName()
@@ -51,11 +59,14 @@ public class JSNIPrinter implements FilePrinter {
     if (jFile.getEnumValues().isEmpty()) {
       writeConstructors(indent, buffer, (JClass) jFile);
     }
+    fPrinter.writeFields(buffer, indent, jFile);
     mPrinter.writeMethods(buffer, indent, jFile);
-    writeSubFiles(buffer, jFile.getInnerJFiles(), indent);
+    for (final JavaFile innerFile: jFile.getInnerJFiles()) {
+      innerFile.setStatic(true); //FIXME setting static should not be done here
+      printJavaFile(innerFile, indent, buffer);
+    }
     buffer.append('}'); // close file
     PrintUtil.nl(buffer);
-    return buffer.toString();
   }
 
   private void writePackageName(final StringBuffer buffer,
@@ -81,7 +92,6 @@ public class JSNIPrinter implements FilePrinter {
   private void writeClass(final StringBuffer buffer, final JClass jFile,
       final int indent) {
     PrintUtil.indent(buffer, jFile.getClassDescription(), indent);
-    PrintUtil.nl(buffer);
     PrintUtil.indent(buffer, indent);
     buffer.append("public ");
     if (jFile.isStatic()) {
@@ -123,21 +133,6 @@ public class JSNIPrinter implements FilePrinter {
       buffer.append(" extends ");
       buffer.append(TypeMapper.GWT_JAVA_SCRIPT_OBJECT);
       buffer.append("> ");
-    }
-  }
-
-  private void writeSubFiles(final StringBuffer buffer,
-      final List<JavaFile> subJFiles, final int indent) {
-    for (final JavaFile jFile : subJFiles) {
-      writeClass(buffer, (JClass) jFile, indent);
-      writeEnumFields(buffer, jFile.getPackageName() + "."
-          + jFile.getClassOrInterfaceName(), jFile.getEnumValues());
-      //      writeSubFiles(buffer, jFile.getSubJFiles());
-      final JSNIMethodPrinter mPrinter = new JSNIMethodPrinter();
-      mPrinter.writeMethods(buffer, indent, jFile);
-      PrintUtil.indent(buffer, indent);
-      buffer.append('}'); // close file
-      PrintUtil.nl(buffer);
     }
   }
 

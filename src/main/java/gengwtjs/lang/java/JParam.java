@@ -19,25 +19,25 @@ public class JParam {
 
   private final String type;
   private String name;
-  private boolean _optional;
+  private boolean optional;
   private boolean varargs;
 
-  public JParam(final String type, final String name) {
-    this.type = type;
+  public JParam(final String name, final String type) {
     this.name = name;
-  }
-
-  public String getType() {
-    return type;
+    this.type = type;
   }
 
   public String getName() {
     return name;
   }
 
-  //  public boolean isOptional() {
-  //    return _optional;
-  //  }
+  public String getType() {
+    return type;
+  }
+
+  public boolean isOptional() {
+    return optional;
+  }
 
   public boolean isVarargs() {
     return varargs;
@@ -45,5 +45,9 @@ public class JParam {
 
   public void setName(final String name) {
     this.name = name;
+  }
+
+  public void setOptional(final boolean optional) {
+    this.optional = optional;
   }
 }

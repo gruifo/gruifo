@@ -39,9 +39,10 @@ public class JavaFile {
   private final String packageName;
   private final boolean _interface;
   private final String classOrInteraceName;
-  private final Set<String> imports = new HashSet<String>();
-  private final List<JMethod> methods = new ArrayList<JMethod>();
-  private final List<EnumValue> enumValues = new ArrayList<EnumValue>();
+  private final Set<String> imports = new HashSet<>();
+  private final List<JParam> fields = new ArrayList<>();;
+  private final List<JMethod> methods = new ArrayList<>();
+  private final List<EnumValue> enumValues = new ArrayList<>();
   private String headerComment = "";
   private final List<JavaFile> innerJFil = new ArrayList<>();
   private boolean _static;
@@ -56,6 +57,10 @@ public class JavaFile {
 
   public void addEnumValue(final String name, final Object value) {
     enumValues.add(new EnumValue(name, value));
+  }
+
+  public void addField(final String name, final String type) {
+    fields.add(new JParam(name, type));
   }
 
   public void addInnerJFile(final JavaFile javaFile) {
@@ -77,6 +82,10 @@ public class JavaFile {
 
   public List<EnumValue> getEnumValues() {
     return enumValues;
+  }
+
+  public List<JParam> getFields() {
+    return fields;
   }
 
   public String getHeaderComment() {
@@ -117,5 +126,9 @@ public class JavaFile {
 
   public void setHeaderComment(final String headerComment) {
     this.headerComment = headerComment;
+  }
+
+  public void setStatic(final boolean _static) {
+    this._static = _static;
   }
 }
