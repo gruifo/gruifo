@@ -20,12 +20,17 @@ import gengwtjs.lang.AccessType;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class JsElement {
+  private static final Logger LOG = LoggerFactory.getLogger(JsElement.class);
 
   public static enum ElementType {
     CLASS,
     CONST,
     CONSTRUCTOR,
+    DEFINE,
     ENUM,
     INTERFACE,
     METHOD,
@@ -53,19 +58,17 @@ public class JsElement {
     }
   }
 
-  public static class JsField {
-
-  }
-
   private AccessType accessType = AccessType.PUBLIC;
   private ElementType elementType;
   private boolean classDesc;
   private String comment;
   private JsType _extends;
   private final List<JsParam> params = new ArrayList<>();
+  private Object typeDef;
   private JsType _return;
   private boolean override;
   private String genericType;
+  private JsType define;
 
   public String getComment() {
     return comment;
@@ -82,6 +85,10 @@ public class JsElement {
     return accessType;
   }
 
+  public JsType getDefine() {
+    return define;
+  }
+
   public JsType getExtends() {
     return _extends;
   }
@@ -92,6 +99,10 @@ public class JsElement {
 
   public List<JsParam> getParams() {
     return params;
+  }
+
+  public Object getTypeDef() {
+    return typeDef;
   }
 
   public JsType getReturn() {
@@ -108,6 +119,10 @@ public class JsElement {
 
   public boolean isConstructor() {
     return elementType == ElementType.CONSTRUCTOR;
+  }
+
+  public boolean isDefine() {
+    return elementType == ElementType.DEFINE;
   }
 
   public boolean isEnum() {
@@ -151,6 +166,11 @@ public class JsElement {
     //    setClass();
   }
 
+  public void setDefine(final JsType define) {
+    this.define = define;
+    elementType = ElementType.DEFINE;
+  }
+
   public void setEnum() {
     elementType = ElementType.ENUM;
   }
@@ -191,7 +211,11 @@ public class JsElement {
     this._return = _return;
   }
 
-  public void setTypeDef() {
-    elementType = ElementType.TYPEDEF;
+  public void setTypeDef(final Object typeDef) {
+    this.typeDef = typeDef;
+    if (elementType != null) {
+      LOG.error("ElementType already set: {}", elementType);
+      //    elementType = ElementType.TYPEDEF;
+    }
   }
 }

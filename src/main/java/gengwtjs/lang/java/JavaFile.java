@@ -43,7 +43,7 @@ public class JavaFile {
   private final List<JMethod> methods = new ArrayList<JMethod>();
   private final List<EnumValue> enumValues = new ArrayList<EnumValue>();
   private String headerComment = "";
-  private final List<JavaFile> subJFiles = new ArrayList<>();
+  private final List<JavaFile> innerJFil = new ArrayList<>();
   private boolean _static;
   private String classDescription;
 
@@ -54,12 +54,17 @@ public class JavaFile {
     this._interface = false; //FIXME;
   }
 
-  public void addMethod(final JMethod method) {
-    methods.add(method);
+  public void addEnumValue(final String name, final Object value) {
+    enumValues.add(new EnumValue(name, value));
   }
 
-  public String getPackageName() {
-    return packageName;
+  public void addInnerJFile(final JavaFile javaFile) {
+    _static = true;
+    innerJFil.add(javaFile);
+  }
+
+  public void addMethod(final JMethod method) {
+    methods.add(method);
   }
 
   public String getClassOrInterfaceName() {
@@ -70,8 +75,28 @@ public class JavaFile {
     return classDescription;
   }
 
-  public void setClassDescription(final String classDescription) {
-    this.classDescription = classDescription;
+  public List<EnumValue> getEnumValues() {
+    return enumValues;
+  }
+
+  public String getHeaderComment() {
+    return headerComment;
+  }
+
+  public Set<String> getImports() {
+    return imports;
+  }
+
+  public List<JavaFile> getInnerJFiles() {
+    return innerJFil;
+  }
+
+  public List<JMethod> getMethods() {
+    return methods;
+  }
+
+  public String getPackageName() {
+    return packageName;
   }
 
   public boolean isClass() {
@@ -86,38 +111,11 @@ public class JavaFile {
     return _static;
   }
 
-  public Set<String> getImports() {
-    return imports;
-  }
-
-  public List<JMethod> getMethods() {
-    return methods;
-  }
-
-
-  public String getHeaderComment() {
-    return headerComment;
+  public void setClassDescription(final String classDescription) {
+    this.classDescription = classDescription;
   }
 
   public void setHeaderComment(final String headerComment) {
     this.headerComment = headerComment;
-  }
-
-  public void addEnumValue(final String name, final Object value) {
-    enumValues.add(new EnumValue(name, value));
-  }
-
-  public List<EnumValue> getEnumValues() {
-    return enumValues;
-  }
-
-  //FIXME wktformat.js -> WKT.java maar moet niet static zijn.
-  public void addSubJFile(final JavaFile javaFile) {
-    //    _static = true;
-    subJFiles.add(javaFile);
-  }
-
-  public List<JavaFile> getSubJFiles() {
-    return subJFiles;
   }
 }

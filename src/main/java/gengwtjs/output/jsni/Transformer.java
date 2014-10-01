@@ -50,8 +50,8 @@ class Transformer {
         new JClass(jsFile.getPackageName(), jsFile.getClassOrInterfaceName());
     addImports(jFile);
     setExtends(jFile, jsFile);
-    for (final JsFile subFile: jsFile.getSubJFiles()) {
-      jFile.addSubJFile(transform(subFile));
+    for (final JsFile subFile: jsFile.getInnerJFiles()) {
+      jFile.addInnerJFile(transform(subFile));
     }
     for(final JsMethod jsMethod: jsFile.getMethods()) {
       if (!ignoreMethod(jsMethod)) {

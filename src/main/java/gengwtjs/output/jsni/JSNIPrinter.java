@@ -52,7 +52,7 @@ public class JSNIPrinter implements FilePrinter {
       writeConstructors(indent, buffer, (JClass) jFile);
     }
     mPrinter.writeMethods(buffer, indent, jFile);
-    writeSubFiles(buffer, jFile.getSubJFiles(), indent);
+    writeSubFiles(buffer, jFile.getInnerJFiles(), indent);
     buffer.append('}'); // close file
     PrintUtil.nl(buffer);
     return buffer.toString();

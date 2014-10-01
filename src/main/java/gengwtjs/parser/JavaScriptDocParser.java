@@ -19,6 +19,8 @@ import gengwtjs.lang.js.JsElement;
 import gengwtjs.lang.js.JsElement.JsParam;
 import gengwtjs.lang.js.JsType;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -145,6 +147,11 @@ public class JavaScriptDocParser {
 
   private static final Pattern ANNOTATION_PATTERN = Pattern.compile("@([^ ]+) ?.*");
 
+  private static final Pattern TYPE_DEF_PATTERN =
+      Pattern.compile("\\{\\{(.*)\\}\\}");
+  private static final Pattern TYPE_DEF_PARAM_PATTERN =
+      Pattern.compile("([^:]+): *(.+)");
+
   private final JsTypeParser jsTypeParser = new JsTypeParser();
 
   public JsElement parse(final String fileName, final String comment) {
@@ -155,7 +162,8 @@ public class JavaScriptDocParser {
       return null;
     }
     final String lines[] = comment.split("\\r?\\n");
-    for (final String line : lines) {
+    for (int i = 0; i < lines.length; i++) {
+      final String line = lines[i];
       final String annotation = findAnnotation(line);
       switch(annotation) {
       case CLASS:
@@ -172,7 +180,7 @@ public class JavaScriptDocParser {
         doc.setConstructor();
         break;
       case DEFINE:
-        LOG.error("TODO define");
+        doc.setDefine(parseType(line, fileName));
         break;
       case ENUM:
         doc.setEnum();
@@ -184,7 +192,7 @@ public class JavaScriptDocParser {
         doc.setMethod();
         break;
       case IMPLEMENTS:
-        //TODO
+        LOG.error("TODO IMPLEMENTS in {}", fileName);
         break;
       case INHERITDOC:
       case OVERRIDE:
@@ -217,8 +225,7 @@ public class JavaScriptDocParser {
         //LOG.error("Annotation template not supported, found in file:{}", annotation, fileName);
         break;
       case TYPEDEF:
-        doc.setTypeDef();
-        doc.setExtends(parseType(line, fileName));
+        i = parseTypeDef(doc, lines, i, fileName);
         break;
       case API:
       case DEPRECATED:
@@ -230,7 +237,7 @@ public class JavaScriptDocParser {
       case STRUCT:
       case SUPPRESS:
       case TODO:
-        // ignore no additional value
+        // ignore annotation, contains no information for the generation.
         break;
       default:
         if (!annotation.isEmpty()) {
@@ -242,25 +249,13 @@ public class JavaScriptDocParser {
     return doc;
   }
 
-  private String findAnnotation(final String line) {
-    final Matcher matcher = ANNOTATION_PATTERN.matcher(line);
-    return matcher.find() ? matcher.group(1) : "";
-  }
-
-  private String parseTemplateType(final String line, final String fileName) {
-    final Pattern pattern = Pattern.compile("@template +([^ ]+)");
-    final Matcher matcher = pattern.matcher(line);
-    return matcher.find() ? matcher.group(1).trim() : "";
-  }
-
   private String convertComment(final String comment) {
     return comment;
   }
 
-  private JsType parseType(final String line, final String fileName) {
-    final Pattern pattern = Pattern.compile("\\{([^\\}]+)\\}");
-    final Matcher matcher = pattern.matcher(line);
-    return matcher.find() ? jsTypeParser.parseType(matcher.group(1).trim()) : null;
+  private String findAnnotation(final String line) {
+    final Matcher matcher = ANNOTATION_PATTERN.matcher(line);
+    return matcher.find() ? matcher.group(1) : "";
   }
 
   private JsParam parseParam(final String line, final String fileName) {
@@ -275,5 +270,68 @@ public class JavaScriptDocParser {
       LOG.error("Parameter could not be parsed, line:{}, file:{}", line, fileName);
       return null;
     }
+  }
+
+  private String parseTemplateType(final String line, final String fileName) {
+    final Pattern pattern = Pattern.compile("@template +([^ ]+)");
+    final Matcher matcher = pattern.matcher(line);
+    return matcher.find() ? matcher.group(1).trim() : "";
+  }
+
+  private JsType parseType(final String line, final String fileName) {
+    final Pattern pattern = Pattern.compile("\\{([^\\}]+)\\}");
+    final Matcher matcher = pattern.matcher(line);
+    return matcher.find() ? jsTypeParser.parseType(matcher.group(1).trim()) : null;
+  }
+
+  private int parseTypeDef(final JsElement doc, final String[] lines, int i,
+      final String fileName) {
+    if (lines[i].contains("{{")) {
+      i = parseTypeClass(doc, lines, i, fileName);
+    } else {
+      doc.setTypeDef(parseType(lines[i], fileName));
+    }
+    return i;
+  }
+
+  private int parseTypeClass(final JsElement doc, final String[] lines, int i,
+      final String fileName) {
+    final List<JsParam> fields = new ArrayList<>();
+    final String split = "#@#";
+    final StringBuffer sb = new StringBuffer(stripAndReplace(lines[i], split));
+    for(; !lines[i].contains("}}"); i++) {
+      sb.append(stripAndReplace(lines[i+1], split));
+    }
+    final Matcher tdp = TYPE_DEF_PATTERN.matcher(sb.toString());
+    if (tdp.find()) {
+      for (final String param : tdp.group(1).split(split)) {
+        final Matcher matcher = TYPE_DEF_PARAM_PATTERN.matcher(param);
+        if (matcher.find()) {
+          final JsParam field = new JsParam();
+          field.setName(matcher.group(1).trim());
+          field.setType(jsTypeParser.parseType((matcher.group(2).trim())));
+          fields.add(field);
+        } else {
+          LOG.error("Missing typedef variable pattern, {} in file {}",
+              param, fileName);
+        }
+      }
+    } else {
+      LOG.error("Missing typedef pattern, {} in file {}",
+          sb.toString().trim(), fileName);
+    }
+    doc.setTypeDef(fields);
+    return i;
+  }
+
+  /**
+   * Replace comment * at beginning of line and replace comma at end of line
+   * with a unique pattern used to split de fields.
+   * @param string
+   * @param split
+   * @return
+   */
+  private String stripAndReplace(final String string, final String split) {
+    return string.replaceFirst("^ +\\*", "").replaceFirst(", *$", split);
   }
 }

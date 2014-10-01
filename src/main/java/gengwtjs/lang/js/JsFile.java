@@ -15,6 +15,8 @@
  */
 package gengwtjs.lang.js;
 
+import gengwtjs.lang.js.JsElement.JsParam;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,8 +24,9 @@ public class JsFile {
 
   private final List<String> enumValues = new ArrayList<>();
   private final List<JsConst> constants = new ArrayList<>();
+  private final List<JsParam> fields = new ArrayList<>();
   private final List<JsMethod> methods = new ArrayList<>();
-  private final List<JsFile> subJFiles = new ArrayList<>();
+  private final List<JsFile> innerJsFiles = new ArrayList<>();
   private final String packageName;
   private final String classOrInteraceName;
   private final boolean _interface;
@@ -44,12 +47,16 @@ public class JsFile {
     enumValues.add(name);
   }
 
+  public void addField(final JsParam field) {
+    fields.add(field);
+  }
+
   public void addMethod(final JsMethod method) {
     methods.add(method);
   }
 
-  public void addSubJsFile(final JsFile jsFile) {
-    subJFiles.add(jsFile);
+  public void addInnerJsFile(final JsFile jsFile) {
+    innerJsFiles.add(jsFile);
   }
 
   public String getClassOrInterfaceName() {
@@ -68,6 +75,10 @@ public class JsFile {
     return enumValues;
   }
 
+  public List<JsParam> getFields() {
+    return fields;
+  }
+
   public List<JsMethod> getMethods() {
     return methods;
   }
@@ -76,8 +87,8 @@ public class JsFile {
     return packageName;
   }
 
-  public List<JsFile> getSubJFiles() {
-    return subJFiles;
+  public List<JsFile> getInnerJFiles() {
+    return innerJsFiles;
   }
 
   public boolean isInterface() {

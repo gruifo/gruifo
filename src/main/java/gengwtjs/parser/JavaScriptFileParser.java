@@ -132,7 +132,9 @@ public class JavaScriptFileParser implements NodeVisitor {
     } else if (isPrototype(enumName)) {
       addMethod(enumName, element);
     } else if (element.isConst()){
-      addConst(enumName, element);
+      //FIXME if const added before class itself file is created twice.
+      // also const element not at toplevel because it's a field not toplevel.
+      //addConst(enumName, element);
     } else {
       LOG.warn("We missed something: {} in file: {}", enumName, fileName);
     }

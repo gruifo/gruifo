@@ -64,9 +64,9 @@ class Controller {
       scanJsFiles(files, srcPath);
     }
     for (final File file : files) {
-      final Collection<JsFile> jsFiles;
       try {
-        jsFiles = groupFiles(parseFile(file.getPath()));
+        final Collection<JsFile> jsFiles =
+            groupFiles(parseFile(file.getPath()));
         writeFiles(printer, jsFiles, outputPath);
       } catch (final IOException e) {
         LOG.error("Exception parsing file:" + file, e);
@@ -104,17 +104,19 @@ class Controller {
 
   Collection<JsFile> groupFiles(final Collection<JsFile> files) {
     final Map<String, JsFile> filesMap = new HashMap<>();
-    for (final JsFile jsFile : files) {
+    for (final JsFile jsFile: files) {
       filesMap.put(jsFile.getClassOrInterfaceName(), jsFile);
     }
     final Collection<JsFile> groupedFiles = new ArrayList<>();
     for (final JsFile jsFile : files) {
       final String[] split = jsFile.getPackageName().split("\\.");
       if (split.length > 0 && filesMap.containsKey(split[split.length - 1])) {
-        //        filesMap.get(split[split.length - 1]).addSubJsFile(jsFile);
-        //      } else if (split.length > 1 && filesMap.containsKey(split[split.length - 2])
+        final JsFile jsFile2 = filesMap.get(split[split.length - 1]);
+        jsFile2.addInnerJsFile(jsFile);
+        //      } else
+        //      if (split.length > 1 && filesMap.containsKey(split[split.length - 1])
         //          && "prototype".equals(split[split.length - 1])) {
-        //        filesMap.get(split[split.length - 2]).addSubJFile(javaFile);
+        //        filesMap.get(split[split.length - 2]).addSubJsFile(jsFile);
       } else {
         groupedFiles.add(jsFile);
       }

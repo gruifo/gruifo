@@ -20,11 +20,11 @@ import static org.junit.Assert.assertTrue;
 import gengwtjs.lang.js.JsElement;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,50 +35,59 @@ import org.junit.Test;
 public class JavaScriptDocParserTest {
 
   private static final String COMMENT1 = "comment1";
-  private JsElement docs;
+  private static final String COMMENT2 = "comment2";
+  private JsElement docs1;
+  private JsElement docs2;
 
   @Before
-  public void parseFile() throws IOException {
+  public void parseFiles() throws IOException {
+    docs1 = parseFile(COMMENT1);
+    docs2 = parseFile(COMMENT2);
+  }
+
+  private JsElement parseFile(final String comment) throws IOException {
     final URL commentFile =
-        JavaScriptDocParserTest.class.getResource(COMMENT1 + ".txt");
-    final FileReader fr = new FileReader(commentFile.getFile());
+        JavaScriptDocParserTest.class.getResource(comment + ".txt");
     final Path file = new File(commentFile.getPath()).toPath();
-    final String comment1 =
-        new String(Files.readAllBytes(file));
+    final String comment1 = new String(Files.readAllBytes(file));
     final JavaScriptDocParser parser = new JavaScriptDocParser();
-    docs = parser.parse(file.toString(), comment1);
+    return parser.parse(file.toString(), comment1);
   }
 
   @Test
   public void testParser() {
-    assertTrue("class description", docs.isClassDescription());
-    assertTrue("constructor", docs.isConstructor());
-    assertTrue("protected", docs.isProtected());
+    assertTrue("class description", docs1.isClassDescription());
+    assertTrue("constructor", docs1.isConstructor());
+    assertTrue("protected", docs1.isProtected());
   }
 
   @Test
   public void testExtends() {
     assertEquals("extends", "nl.Object",
-        docs.getExtends().getTypes().get(0).getName());
+        docs1.getExtends().getTypes().get(0).getName());
   }
 
   @Test
   public void testParam() {
-    assertEquals("params size", 12, docs.getParams().size());
+    assertEquals("params size", 12, docs1.getParams().size());
     assertEquals("params 0 name",
-        "options", docs.getParams().get(0).getName());
+        "options", docs1.getParams().get(0).getName());
     assertEquals("params 0 type",
-        "nl.Options", docs.getParams().get(0).getTypes().getTypes().get(0).getName());
+        "nl.Options", docs1.getParams().get(0).getTypes().getTypes().get(0).getName());
     assertTrue("params 1",
-        docs.getParams().get(1).getTypes().isFunction());
+        docs1.getParams().get(1).getTypes().isFunction());
   }
 
   @Test
   public void testReturn() {
     assertEquals("return type 1", "nl.Object",
-        docs.getReturn().getTypes().get(0).getName());
+        docs1.getReturn().getTypes().get(0).getName());
     assertEquals("return type 2", "undefined",
-        docs.getReturn().getTypes().get(1).getName());
+        docs1.getReturn().getTypes().get(1).getName());
   }
 
+  @Test
+  public void testTypeDef() {
+    assertEquals("Size of typedef fields", 4, ((List) docs2.getTypeDef()).size());
+  }
 }

@@ -30,5 +30,6 @@
  * @type {!Array.<?number>} 
  * @type {Object.<string, *>} 
  * @type {Array.<ol.RendererType>}
+ * @typedef {Array.<number>}
  */
  
