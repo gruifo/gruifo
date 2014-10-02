@@ -21,10 +21,10 @@ public class JsMethod {
 
   private JsElement element;
   private String methodName;
-  private final String classPath;
+  private final String packageName;
 
-  public JsMethod(final String classPath, final String functionName) {
-    this.classPath = classPath;
+  public JsMethod(final String packageName, final String functionName) {
+    this.packageName = packageName;
     methodName = functionName;
   }
 
@@ -32,8 +32,8 @@ public class JsMethod {
     return element.getAccessType();
   }
 
-  public String getClassPath() {
-    return classPath;
+  public String getPackageName() {
+    return packageName;
   }
 
   public JsElement getElement() {

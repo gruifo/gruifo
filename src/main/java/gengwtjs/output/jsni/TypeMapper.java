@@ -26,18 +26,26 @@ public final class TypeMapper {
   public static final TypeMapper INSTANCE = new TypeMapper();
 
   private final Map<String, String> mapper = new HashMap<>();
-  //  private static final List<String> NATIVE_TYPES = Arrays.asList(new String[] {
-  //      "void", "int", "long", "double", "float", "boolean", "string", "number",
-  //      "*", "object" });
+  private final Map<String, String> nativeMapper = new HashMap<>();
+  private final Map<String, String> genericMapper = new HashMap<>();
 
   private TypeMapper() {
-    mapper.put("void", "void");
-    mapper.put("string", "String");
-    mapper.put("int", "int");
-    mapper.put("double", "double");
-    mapper.put("float", "float");
-    mapper.put("boolean", "boolean");
-    mapper.put("number", "double");
+    nativeMapper.put("void", "void");
+    nativeMapper.put("string", "String");
+    nativeMapper.put("int", "int");
+    nativeMapper.put("double", "double");
+    nativeMapper.put("float", "float");
+    nativeMapper.put("boolean", "boolean");
+    nativeMapper.put("number", "double");
+
+    genericMapper.put("void", "Void");
+    genericMapper.put("string", "String");
+    genericMapper.put("int", "Integer");
+    genericMapper.put("double", "Double");
+    genericMapper.put("float", "Float");
+    genericMapper.put("boolean", "Boolean");
+    genericMapper.put("number", "Double");
+
     mapper.put("*", GWT_JAVA_SCRIPT_OBJECT);
     mapper.put("object", GWT_JAVA_SCRIPT_OBJECT);
     mapper.put("Object", GWT_JAVA_SCRIPT_OBJECT);
@@ -60,7 +68,27 @@ public final class TypeMapper {
     }
   }
 
+  public String mapType(final String typeToMap, final boolean generic) {
+    return mapOtherType(generic
+        ? mapGenericType(typeToMap) : mapNativeType(typeToMap));
+  }
+
   public String mapType(final String typeToMap) {
-    return mapper.containsKey(typeToMap) ? mapper.get(typeToMap) : typeToMap;
+    return mapOtherType(mapNativeType(typeToMap));
+  }
+
+  private String mapOtherType(final String typeToMap) {
+    return mapper.containsKey(typeToMap)
+        ? mapper.get(typeToMap) : typeToMap;
+  }
+
+  private String mapGenericType(final String typeToMap) {
+    return genericMapper.containsKey(typeToMap) ?
+        genericMapper.get(typeToMap) : typeToMap;
+  }
+
+  private String mapNativeType(final String typeToMap) {
+    return nativeMapper.containsKey(typeToMap)
+        ? nativeMapper.get(typeToMap) : typeToMap;
   }
 }

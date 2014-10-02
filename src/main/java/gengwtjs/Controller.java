@@ -15,6 +15,7 @@
  */
 package gengwtjs;
 
+import gengwtjs.lang.js.JsElement.JsParam;
 import gengwtjs.lang.js.JsFile;
 import gengwtjs.output.FilePrinter;
 import gengwtjs.parser.JavaScriptFileParser;
@@ -47,11 +48,8 @@ class Controller {
 
   private static final Logger LOG = LoggerFactory.getLogger(Controller.class);
 
-  private List<File> srcPaths;
-  private File outputPath;
-
-  public Controller() {
-  }
+  private final List<File> srcPaths;
+  private final File outputPath;
 
   public Controller(final List<File> srcPaths, final File outputPath) {
     this.srcPaths = srcPaths;
@@ -66,7 +64,7 @@ class Controller {
     for (final File file : files) {
       try {
         final Collection<JsFile> jsFiles =
-            groupFiles(parseFile(file.getPath()));
+            prepareFiles(parseFile(file.getPath()));
         writeFiles(printer, jsFiles, outputPath);
       } catch (final IOException e) {
         LOG.error("Exception parsing file:" + file, e);
@@ -100,6 +98,28 @@ class Controller {
       node.visitAll(parser);
       return parser.getFiles();
     }
+  }
+
+  Collection<JsFile> prepareFiles(final Collection<JsFile> files) {
+    return groupFiles(prepareFields(files));
+  }
+
+  private Collection<JsFile> prepareFields(final Collection<JsFile> files) {
+    for (final JsFile jsFile : files) {
+      if (jsFile.getElement().getTypeDef() instanceof List) {
+        final List<JsParam> typeDef =
+            (List<JsParam>) jsFile.getElement().getTypeDef();
+        for (final JsParam field : jsFile.getFields()) {
+          for (int i = 0; i < typeDef.size(); i++) {
+            if (field.getName().equals(typeDef.get(i).getName())) {
+              typeDef.remove(i);
+              break;
+            }
+          }
+        }
+      }
+    }
+    return files;
   }
 
   Collection<JsFile> groupFiles(final Collection<JsFile> files) {

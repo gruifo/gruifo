@@ -21,10 +21,15 @@ public class JParam {
   private String name;
   private boolean optional;
   private boolean varargs;
+  private String javaDoc;
 
   public JParam(final String name, final String type) {
     this.name = name;
     this.type = type;
+  }
+
+  public String getJavaDoc() {
+    return javaDoc;
   }
 
   public String getName() {
@@ -41,6 +46,10 @@ public class JParam {
 
   public boolean isVarargs() {
     return varargs;
+  }
+
+  public void setJavaDoc(final String javaDoc) {
+    this.javaDoc = javaDoc;
   }
 
   public void setName(final String name) {

@@ -73,9 +73,9 @@ public class JavaScriptDocParserTest {
     assertEquals("params 0 name",
         "options", docs1.getParams().get(0).getName());
     assertEquals("params 0 type",
-        "nl.Options", docs1.getParams().get(0).getTypes().getTypes().get(0).getName());
+        "nl.Options", docs1.getParams().get(0).getType().getTypes().get(0).getName());
     assertTrue("params 1",
-        docs1.getParams().get(1).getTypes().isFunction());
+        docs1.getParams().get(1).getType().isFunction());
   }
 
   @Test

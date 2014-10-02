@@ -16,6 +16,7 @@
 package gengwtjs.parser;
 
 import gengwtjs.lang.js.JsElement;
+import gengwtjs.lang.js.JsElement.JsParam;
 import gengwtjs.lang.js.JsFile;
 import gengwtjs.lang.js.JsMethod;
 import gengwtjs.output.PrintUtil;
@@ -23,7 +24,6 @@ import gengwtjs.output.PrintUtil;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.Assignment;
@@ -32,10 +32,7 @@ import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.Block;
 import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionNode;
-import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NodeVisitor;
-import org.mozilla.javascript.ast.ObjectLiteral;
-import org.mozilla.javascript.ast.ObjectProperty;
 import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.Scope;
 import org.slf4j.Logger;
@@ -116,28 +113,29 @@ public class JavaScriptFileParser implements NodeVisitor {
     if (element == null || element.isPrivate()) {
       return; // ignore private stuff...
     }
-    if (element.isEnum()) {
-      final JsFile jsFile = parseClassOrInterfaceName(enumName, false);
-      jsFile.setElement(element);
-      files.put(enumName, jsFile);
-      if (astNode instanceof ObjectLiteral) {
-        final ObjectLiteral ol = (ObjectLiteral) astNode;
-        for (final ObjectProperty op : ol.getElements()) {
-          final Name left = (Name) op.getLeft();
-          jsFile.addEnumValue(left.toSource());
-        }
-        // LOG.warn("Yes this is a ArrayLiteral: {} in file: {}", enumName,
-        // fileName);
-      }
-    } else if (isPrototype(enumName)) {
-      addMethod(enumName, element);
-    } else if (element.isConst()){
-      //FIXME if const added before class itself file is created twice.
-      // also const element not at toplevel because it's a field not toplevel.
-      //addConst(enumName, element);
-    } else {
-      LOG.warn("We missed something: {} in file: {}", enumName, fileName);
-    }
+    //    LOG.error("Enum: {}, {}", enumName, element);
+    //    if (element.isEnum()) {
+    //      final JsFile jsFile = parseClassOrInterfaceName(enumName, false);
+    //      jsFile.setElement(element);
+    //      files.put(enumName, jsFile);
+    //      if (astNode instanceof ObjectLiteral) {
+    //        final ObjectLiteral ol = (ObjectLiteral) astNode;
+    //        for (final ObjectProperty op : ol.getElements()) {
+    //          final Name left = (Name) op.getLeft();
+    //          jsFile.addEnumValue(left.toSource());
+    //        }
+    //        // LOG.warn("Yes this is a ArrayLiteral: {} in file: {}", enumName,
+    //        // fileName);
+    //      }
+    //    } else if (isPrototype(enumName)) {
+    //      addMethod(enumName, element);
+    //    } else if (element.isConst()){
+    //      //FIXME if const added before class itself file is created twice.
+    //      // also const element not at toplevel because it's a field not toplevel.
+    //      //addConst(enumName, element);
+    //    } else {
+    //      LOG.warn("We missed something: {} in file: {}", enumName, fileName);
+    //    }
   }
 
   private void visitMethodOrClass(final String methodOrClassName,
@@ -160,21 +158,41 @@ public class JavaScriptFileParser implements NodeVisitor {
       jFile.setElement(element);
       files.put(methodOrClassName, jFile);
     } else if (isPrototype(methodOrClassName)) {
+      addMethodOrField(methodOrClassName, element);
+    }
+  }
+
+  private void addMethodOrField(final String methodOrClassName, final JsElement element) {
+    if (element.getType() == null) {
       addMethod(methodOrClassName, element);
+    } else {
+      addAsField(methodOrClassName, element);
     }
   }
 
   private void addMethod(final String methodOrClassName, final JsElement element) {
     final JsMethod method = parseMethod(methodOrClassName);
     method.setElement(element);
-    final JsFile JsFile = files.get(method.getClassPath());
-    if (JsFile == null) {
-      LOG.warn("class not in file for: {}", method.getClassPath());
+    final JsFile jsFile = files.get(method.getPackageName());
+    if (jsFile == null) {
+      LOG.warn("class not in file for: {}", method.getPackageName());
     } else {
-      JsFile.addMethod(method);
+      jsFile.addMethod(method);
     }
   }
 
+  private void addAsField(final String name, final JsElement element) {
+    final int prot = name.indexOf(PROTOTYPE);
+    final String packageName = name.substring(0, prot - 1);
+    final String fieldName = name.substring(prot + PROTOTYPE.length() + 1);
+    final JsParam field = new JsParam(fieldName, element);
+    final JsFile jsFile = files.get(packageName);
+    if (jsFile == null) {
+      LOG.warn("class not in file for: {}", packageName);
+    } else {
+      jsFile.addField(field);
+    }
+  }
   private void addConst(final String constName, final JsElement element) {
     final String packageName =
         constName.substring(0, constName.lastIndexOf('.'));
@@ -202,30 +220,13 @@ public class JavaScriptFileParser implements NodeVisitor {
   JsMethod parseMethod(final String name) {
     final int prot = name.indexOf(PROTOTYPE);
     final String packageName = name.substring(0, prot - 1);
-    final String functionName = name.substring(prot + PROTOTYPE.length() + 1);
-    return new JsMethod(packageName, functionName);
+    final String methodName = name.substring(prot + PROTOTYPE.length() + 1);
+    return new JsMethod(packageName, methodName);
   }
 
   private boolean isPrototype(final String functionName) {
     return functionName.indexOf(PROTOTYPE) > 0;
   }
-
-  private void addImports(final Set<String> importSet, final JsElement jsElement) {
-    // FIXME addImports
-    //    for (final JsParam param : jsElement.getParams()) {
-    //      if (shouldImport(param)) {
-    //        importSet.add(param.getType());
-    //      }
-    //    }
-    //    if (shouldImport(jsElement.getReturn())) {
-    //      importSet.add(jsElement.getReturn().getType());
-    //    }
-  }
-
-  //  private boolean shouldImport(final JsType type) {
-  //    return type == null || type.getType() == null ? false : !NATIVE_TYPES
-  //        .contains(type.getType().toLowerCase());
-  //  }
 
   private void checkAndAddTypedef(final AstNode node) {
     if (node instanceof PropertyGet
@@ -238,7 +239,7 @@ public class JavaScriptFileParser implements NodeVisitor {
       final JsElement element = parser.parse(fileName, node.getJsDoc());
       final String typedef = node.toSource();
       if (isPrototype(typedef)) {
-        addMethod(typedef, element);
+        addMethodOrField(typedef, element);
       } else {
         final JsFile jFile = parseClassOrInterfaceName(typedef,
             element.isInterface());

@@ -11,7 +11,7 @@ public class JMethod {
   private final AccessType accessType;
   private String _return;
   private final List<JParam> params = new ArrayList<>();
-  private String comment;
+  private String jsDoc;
   private boolean complex;
   private String genericType;
 
@@ -33,8 +33,8 @@ public class JMethod {
     return classPath;
   }
 
-  public String getComment() {
-    return comment;
+  public String getJsDoc() {
+    return jsDoc;
   }
 
   public String getGenericType() {
@@ -57,8 +57,8 @@ public class JMethod {
     return complex;
   }
 
-  public void setComment(final String comment) {
-    this.comment = comment;
+  public void setJsDoc(final String jsDoc) {
+    this.jsDoc = jsDoc;
   }
 
   public void setComplex(final boolean complex) {

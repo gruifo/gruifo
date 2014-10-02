@@ -38,15 +38,28 @@ public class JsElement {
   }
 
   public static class JsParam {
-    private JsType types;
+    private JsType type;
     private String name;
+    private JsElement element;
+
+    public JsParam() {
+    }
+
+    public JsParam(final String name, final JsElement element) {
+      this.name = name;
+      this.element = element;
+    }
+
+    public JsElement getElement() {
+      return element;
+    }
 
     public String getName() {
       return name;
     }
 
-    public JsType getTypes() {
-      return types;
+    public JsType getType() {
+      return element == null ? type : element.getType();
     }
 
     public void setName(final String name) {
@@ -54,31 +67,30 @@ public class JsElement {
     }
 
     public void setType(final JsType jsType) {
-      this.types = jsType;
+      this.type = jsType;
+    }
+
+    @Override
+    public String toString() {
+      return "JsParam [name=" + name + ", type=" + type + "]";
     }
   }
 
   private AccessType accessType = AccessType.PUBLIC;
   private ElementType elementType;
   private boolean classDesc;
-  private String comment;
+  private String jsDoc;
   private JsType _extends;
   private final List<JsParam> params = new ArrayList<>();
   private Object typeDef;
+  private JsType type;
   private JsType _return;
   private boolean override;
   private String genericType;
   private JsType define;
 
-  public String getComment() {
-    return comment;
-  }
-  public void setComment(final String comment) {
-    this.comment = comment;
-  }
-
-  public boolean isClass() {
-    return elementType == ElementType.CONSTRUCTOR;
+  public String getJsDoc() {
+    return jsDoc;
   }
 
   public AccessType getAccessType() {
@@ -101,12 +113,20 @@ public class JsElement {
     return params;
   }
 
+  public JsType getType() {
+    return type;
+  }
+
   public Object getTypeDef() {
     return typeDef;
   }
 
   public JsType getReturn() {
     return _return;
+  }
+
+  public boolean isClass() {
+    return elementType == ElementType.CONSTRUCTOR;
   }
 
   public boolean isClassDescription() {
@@ -179,11 +199,12 @@ public class JsElement {
     this._extends = _extends;
   }
 
-  public void setAsField(final JsType parseSingleType) {
-  }
-
   public void setGenericType(final String genericType) {
     this.genericType = genericType;
+  }
+
+  public void setJsDoc(final String jsDoc) {
+    this.jsDoc = jsDoc;
   }
 
   public void setOverride() {
@@ -211,11 +232,24 @@ public class JsElement {
     this._return = _return;
   }
 
+  public void setType(final JsType type) {
+    this.type = type;
+  }
+
   public void setTypeDef(final Object typeDef) {
     this.typeDef = typeDef;
     if (elementType != null) {
       LOG.error("ElementType already set: {}", elementType);
       //    elementType = ElementType.TYPEDEF;
     }
+  }
+  @Override
+  public String toString() {
+    return "JsElement [accessType=" + accessType + ", elementType="
+        + elementType + ", classDesc=" + classDesc + ", comment=" + jsDoc
+        + ", _extends=" + _extends + ", params=" + params + ", typeDef="
+        + typeDef + ", type=" + type + ", _return=" + _return + ", override="
+        + override + ", genericType=" + genericType + ", define=" + define
+        + "]";
   }
 }

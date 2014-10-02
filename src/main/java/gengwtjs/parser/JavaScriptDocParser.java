@@ -156,7 +156,7 @@ public class JavaScriptDocParser {
 
   public JsElement parse(final String fileName, final String comment) {
     final JsElement doc = new JsElement();
-    doc.setComment(convertComment(comment));
+    doc.setJsDoc(convertComment(comment));
     if (comment == null) {
       LOG.error("Comment in file {} is empty.", fileName);
       return null;
@@ -217,7 +217,7 @@ public class JavaScriptDocParser {
         doc.setReturn(parseType(line, fileName));
         break;
       case TYPE:
-        doc.setAsField(parseType(line, fileName));
+        doc.setType(parseType(line, fileName));
         break;
       case TEMPLATE:
         doc.setGenericType(parseTemplateType(line, fileName));

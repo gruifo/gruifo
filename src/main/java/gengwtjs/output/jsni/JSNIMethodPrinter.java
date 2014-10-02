@@ -26,7 +26,7 @@ class JSNIMethodPrinter {
   public void writeMethods(final StringBuffer buffer, final int indent,
       final JavaFile jFile) {
     for (final JMethod method : jFile.getMethods()) {
-      PrintUtil.indent(buffer, method.getComment(), indent);
+      PrintUtil.indent(buffer, method.getJsDoc(), indent);
       PrintUtil.indent(buffer, indent);
       if (method.isComplex()) {
         buffer.append("/*");

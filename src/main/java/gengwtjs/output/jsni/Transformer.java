@@ -50,7 +50,7 @@ class Transformer {
         new JClass(jsFile.getPackageName(), jsFile.getClassOrInterfaceName());
     addImports(jFile);
     setExtends(jFile, jsFile);
-    jFile.setClassDescription(jsFile.getElement().getComment());
+    jFile.setClassDescription(jsFile.getElement().getJsDoc());
     for (final JsFile subFile: jsFile.getInnerJFiles()) {
       jFile.addInnerJFile(transform(subFile));
     }
@@ -62,7 +62,7 @@ class Transformer {
       if (!ignoreMethod(jsMethod)) {
         final JMethod method = transformMethod(jsMethod);
         if (jsMethod.getElement().isClassDescription()) {
-          jFile.setClassDescription(jsMethod.getElement().getComment());
+          jFile.setClassDescription(jsMethod.getElement().getJsDoc());
         }
         if (jsMethod.getElement().isConstructor()) {
           jFile.addConstructor(method);
@@ -92,7 +92,11 @@ class Transformer {
 
   private void transformFields(final JClass jFile, final List<JsParam> jsFields) {
     for (final JsParam jsParam : jsFields) {
-      jFile.addField(jsParam.getName(), transformType(jsParam.getTypes()));
+      final JParam field =
+          jFile.addField(jsParam.getName(), transformType(jsParam.getType()));
+      if (jsParam.getElement() != null) {
+        field.setJavaDoc(jsParam.getElement().getJsDoc());
+      }
     }
   }
 
@@ -104,15 +108,15 @@ class Transformer {
   }
 
   private JMethod transformMethod(final JsMethod jsMethod) {
-    final JMethod jMethod = new JMethod(jsMethod.getClassPath(),
+    final JMethod jMethod = new JMethod(jsMethod.getPackageName(),
         jsMethod.getMethodName(), jsMethod.getAccessType());
-    jMethod.setComment(jsMethod.getElement().getComment());
-    jMethod.setComplex(isComplex(jsMethod));
+    jMethod.setJsDoc(jsMethod.getElement().getJsDoc());
+    //    jMethod.setComplex(isComplex(jsMethod));
     setReturnType(jsMethod, jMethod);
     for (final JsParam jsParam: jsMethod.getElement().getParams()) {
       final JParam param =
-          new JParam(jsParam.getName(), transformType(jsParam.getTypes()));
-      param.setOptional(jsParam.getTypes().isOptional());
+          new JParam(jsParam.getName(), transformType(jsParam.getType()));
+      param.setOptional(jsParam.getType().isOptional());
       jMethod.addParam(param);
     }
     return jMethod;
@@ -124,7 +128,7 @@ class Transformer {
       return true;
     }
     for (final JsParam jsParam : jsMethod.getElement().getParams()) {
-      if (jsParam.getTypes().isFunction()) {
+      if (jsParam.getType().isFunction()) {
         return true;
       }
     }
@@ -162,39 +166,45 @@ class Transformer {
         type = TypeMapper.GWT_JAVA_SCRIPT_OBJECT;
       }
     } else {
-      type = transformType(jsType.getTypes().get(0));
+      type = transformType(jsType.getTypes().get(0), false);
       if (jsType.isVarArgs()) {
         type = type + "...";
       }
     }
     return type;
   }
-  private String transformType(final JsTypeSpec jsTypeSpec) {
+  private String transformType(final JsTypeSpec jsTypeSpec,
+      final boolean generic) {
     String type = "";
     if (jsTypeSpec.isGeneric()) {
       if (jsTypeSpec.getGenerics().size() > 1) {
         type = TypeMapper.GWT_JAVA_SCRIPT_OBJECT;
       } else {
         final String sType = tranformSpecific(jsTypeSpec.getGenerics().get(0));
-        type = TypeMapper.INSTANCE.mapType(jsTypeSpec.getName()) + "<"
-            + (sType == null ? transformType(jsTypeSpec.getGenerics().get(0)) : sType)
+        type = TypeMapper.INSTANCE.mapType(jsTypeSpec.getName(), generic) + "<"
+            + (sType == null
+            ? transformType(jsTypeSpec.getGenerics().get(0), true) : sType)
             + ">";
       }
     } else {
-      type = TypeMapper.INSTANCE.mapType(jsTypeSpec.getName());
+      type = TypeMapper.INSTANCE.mapType(jsTypeSpec.getName(), generic);
     }
     return type;
   }
 
   private String tranformSpecific(final JsType jsType) {
-    if (jsType.getTypes().size() == 1) {
-      return tranformSpecific(jsType.getTypes().get(0));
+    final String ts;
+    if (jsType.isFunction()) {
+      ts = TypeMapper.GWT_JAVA_SCRIPT_OBJECT;
+    } else if (jsType.getTypes().size() == 1) {
+      ts = tranformSpecific(jsType.getTypes().get(0));
     } else if (jsType.getTypes().size() == 2) {
       final JsTypeSpec other = containsUndefined(jsType.getTypes());
-      return other == null ? null : tranformSpecific(other);
+      ts = other == null ? null : tranformSpecific(other);
     } else {
-      return null;
+      ts = null;
     }
+    return ts;
   }
 
   private String tranformSpecific(final JsTypeSpec jsTypeSpec) {

@@ -59,8 +59,10 @@ public class JavaFile {
     enumValues.add(new EnumValue(name, value));
   }
 
-  public void addField(final String name, final String type) {
-    fields.add(new JParam(name, type));
+  public JParam addField(final String name, final String type) {
+    final JParam jParam = new JParam(name, type);
+    fields.add(jParam);
+    return jParam;
   }
 
   public void addInnerJFile(final JavaFile javaFile) {
