@@ -38,7 +38,7 @@ import org.apache.commons.cli.ParseException;
 class CmdOptions {
 
   private static final String HELP = "help";
-  private static final String JNSI = "JNSI";
+  private static final String JSNI = "JSNI";
   private static final String JSINTERFACE = "JSInterface";
   private static final String SRC_PATH = "src";
   private static final String SRC_PATH_ARG = "directory;...";
@@ -50,8 +50,8 @@ class CmdOptions {
 
   private static final Option HELP_OPTION =
       new Option(HELP, "print this message");
-  private static final Option JNSI_OPTION =
-      new Option(JNSI, "generate JSNI files");
+  private static final Option JSNI_OPTION =
+      new Option(JSNI, "generate JSNI files");
   private static final Option JSINTERFACE_OPTION =
       new Option(JSINTERFACE, "generate JSInterface files");
   private static final Option SRC_PATH_OPTION =
@@ -67,7 +67,7 @@ class CmdOptions {
   public CmdOptions(final String[] args) throws ParseException {
     options = new Options();
     options.addOption(HELP_OPTION);
-    options.addOption(JNSI_OPTION);
+    options.addOption(JSNI_OPTION);
     options.addOption(JSINTERFACE_OPTION);
     SRC_PATH_OPTION.setArgName(SRC_PATH_ARG);
     SRC_PATH_OPTION.setRequired(true);
