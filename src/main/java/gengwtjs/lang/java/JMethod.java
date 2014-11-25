@@ -12,7 +12,6 @@ public class JMethod {
   private String _return;
   private final List<JParam> params = new ArrayList<>();
   private String jsDoc;
-  private boolean complex;
   private String genericType;
 
   public JMethod(final String classPath, final String functionName, final AccessType accessType) {
@@ -53,16 +52,8 @@ public class JMethod {
     return _return;
   }
 
-  public boolean isComplex() {
-    return complex;
-  }
-
   public void setJsDoc(final String jsDoc) {
     this.jsDoc = jsDoc;
-  }
-
-  public void setComplex(final boolean complex) {
-    this.complex = complex;
   }
 
   public void setGenericType(final String genericType) {

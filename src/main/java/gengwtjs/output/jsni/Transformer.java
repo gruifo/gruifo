@@ -59,6 +59,11 @@ class Transformer {
     }
     setExtends(jFile, jsFile);
     transformFields(jFile, jsFile.getFields());
+    transformMethods(jsFile, jFile);
+    return jFile;
+  }
+
+  private void transformMethods(final JsFile jsFile, final JClass jFile) {
     for(final JsMethod jsMethod: jsFile.getMethods()) {
       if (!ignoreMethod(jsMethod)) {
         final JMethod method = transformMethod(jsMethod);
@@ -72,7 +77,6 @@ class Transformer {
         }
       }
     }
-    return jFile;
   }
 
   private void addImports(final JavaFile javaFile) {
@@ -114,7 +118,6 @@ class Transformer {
     final JMethod jMethod = new JMethod(jsMethod.getPackageName(),
         jsMethod.getMethodName(), jsMethod.getAccessType());
     jMethod.setJsDoc(jsMethod.getElement().getJsDoc());
-    //    jMethod.setComplex(isComplex(jsMethod));
     setReturnType(jsMethod, jMethod);
     for (final JsParam jsParam: jsMethod.getElement().getParams()) {
       final JParam param =
@@ -123,19 +126,6 @@ class Transformer {
       jMethod.addParam(param);
     }
     return jMethod;
-  }
-
-  private boolean isComplex(final JsMethod jsMethod) {
-    if (jsMethod.getElement().getReturn() != null
-        && jsMethod.getElement().getReturn().isFunction()) {
-      return true;
-    }
-    for (final JsParam jsParam : jsMethod.getElement().getParams()) {
-      if (jsParam.getType().isFunction()) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private void setReturnType(final JsMethod jsMethod, final JMethod jMethod) {
