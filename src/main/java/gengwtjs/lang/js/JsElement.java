@@ -88,6 +88,7 @@ public class JsElement {
   private boolean override;
   private String genericType;
   private JsType define;
+  private JsType enumType;
 
   public String getJsDoc() {
     return jsDoc;
@@ -99,6 +100,10 @@ public class JsElement {
 
   public JsType getDefine() {
     return define;
+  }
+
+  public JsType getEnumType() {
+    return enumType;
   }
 
   public JsType getExtends() {
@@ -191,8 +196,9 @@ public class JsElement {
     elementType = ElementType.DEFINE;
   }
 
-  public void setEnum() {
+  public void setEnum(final JsType jsType) {
     elementType = ElementType.ENUM;
+    enumType = jsType;
   }
 
   public void setExtends(final JsType _extends) {

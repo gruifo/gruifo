@@ -146,7 +146,6 @@ public class JavaScriptDocParser {
   private static final String TYPEDEF = "typedef";
 
   private static final Pattern ANNOTATION_PATTERN = Pattern.compile("@([^ ]+) ?.*");
-
   private static final Pattern TYPE_DEF_PATTERN =
       Pattern.compile("\\{\\{(.*)\\}\\}");
   private static final Pattern TYPE_DEF_PARAM_PATTERN =
@@ -183,7 +182,7 @@ public class JavaScriptDocParser {
         doc.setDefine(parseType(line, fileName));
         break;
       case ENUM:
-        doc.setEnum();
+        doc.setEnum(parseType(line, fileName));
         break;
       case EXTENDS:
         doc.setExtends(parseType(line, fileName));

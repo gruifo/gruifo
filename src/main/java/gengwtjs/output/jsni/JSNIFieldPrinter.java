@@ -24,7 +24,7 @@ import gengwtjs.output.PrintUtil;
  */
 public class JSNIFieldPrinter {
 
-  public void writeFields(final StringBuffer buffer, final int indent,
+  public void printFields(final StringBuffer buffer, final int indent,
       final JavaFile jFile) {
     for (final JParam field : jFile.getFields()) {
       printGetter(buffer, indent, field);

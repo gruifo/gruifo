@@ -25,6 +25,7 @@ import gengwtjs.lang.js.JsMethod;
 import gengwtjs.lang.js.JsType;
 import gengwtjs.lang.js.JsType.JsTypeSpec;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -58,22 +59,34 @@ class Transformer {
       jFile.setDataClass(true);
     }
     setExtends(jFile, jsFile);
+    transformEnumFields(jFile, jsFile.getElement().getEnumType(),
+        jsFile.getEnumValues());
     transformFields(jFile, jsFile.getFields());
     transformMethods(jsFile, jFile);
     return jFile;
   }
 
+  private void transformEnumFields(final JClass jFile, final JsType enumType,
+      final List<String> enumValues) {
+    for (final String enumValue: enumValues) {
+      jFile.addEnumValue(enumValue, transformType(enumType));
+    }
+  }
+
   private void transformMethods(final JsFile jsFile, final JClass jFile) {
     for(final JsMethod jsMethod: jsFile.getMethods()) {
       if (!ignoreMethod(jsMethod)) {
-        final JMethod method = transformMethod(jsMethod);
-        if (jsMethod.getElement().isClassDescription()) {
-          jFile.setClassDescription(jsMethod.getElement().getJsDoc());
-        }
-        if (jsMethod.getElement().isConstructor()) {
-          jFile.addConstructor(method);
-        } else {
-          jFile.addMethod(method);
+        for (final List<JParam> params : methodParams(
+            jsMethod.getElement().getParams())) {
+          final JMethod method = transformMethod(jsMethod, params);
+          if (jsMethod.getElement().isClassDescription()) {
+            jFile.setClassDescription(jsMethod.getElement().getJsDoc());
+          }
+          if (jsMethod.getElement().isConstructor()) {
+            jFile.addConstructor(method);
+          } else {
+            jFile.addMethod(method);
+          }
         }
       }
     }
@@ -97,7 +110,8 @@ class Transformer {
     }
   }
 
-  private void transformFields(final JClass jFile, final List<JsParam> jsFields) {
+  private void transformFields(final JClass jFile,
+      final List<JsParam> jsFields) {
     for (final JsParam jsParam : jsFields) {
       final JParam field =
           jFile.addField(jsParam.getName(), transformType(jsParam.getType()));
@@ -114,15 +128,30 @@ class Transformer {
         || "clone".equals(jsMethod.getMethodName()); // FIXME clone
   }
 
-  private JMethod transformMethod(final JsMethod jsMethod) {
+  private List<List<JParam>> methodParams(final List<JsParam> jsParams) {
+    final List<List<JParam>> params = new ArrayList<>();
+    List<JParam> current = new ArrayList<JParam>();
+    params.add(current);
+    for (int i = 0; i < jsParams.size(); i++) {
+      final JsParam jsParam = jsParams.get(i);
+      if (jsParam.getType().isOptional()) {
+        current = new ArrayList<JParam>(params.get(params.size() - 1));
+        params.add(current);
+      }
+      final JParam param =
+          new JParam(jsParam.getName(), transformType(jsParam.getType()));
+      current.add(param);
+    }
+    return params;
+  }
+
+  private JMethod transformMethod(final JsMethod jsMethod,
+      final List<JParam> params) {
     final JMethod jMethod = new JMethod(jsMethod.getPackageName(),
         jsMethod.getMethodName(), jsMethod.getAccessType());
     jMethod.setJsDoc(jsMethod.getElement().getJsDoc());
     setReturnType(jsMethod, jMethod);
-    for (final JsParam jsParam: jsMethod.getElement().getParams()) {
-      final JParam param =
-          new JParam(jsParam.getName(), transformType(jsParam.getType()));
-      param.setOptional(jsParam.getType().isOptional());
+    for (final JParam param : params) {
       jMethod.addParam(param);
     }
     return jMethod;

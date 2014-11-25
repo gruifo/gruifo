@@ -23,17 +23,17 @@ import java.util.Set;
 public class JavaFile {
   public static class EnumValue {
     private final String name;
-    private final Object value;
+    private final String type;
 
-    public EnumValue(final String name, final Object value) {
+    public EnumValue(final String name, final String type) {
       this.name = name;
-      this.value = value;
+      this.type = type;
     }
     public String getName() {
       return name;
     }
-    public Object getValue() {
-      return value;
+    public String getType() {
+      return type;
     }
   }
   private final String packageName;
@@ -55,7 +55,7 @@ public class JavaFile {
     this._interface = false; //FIXME;
   }
 
-  public void addEnumValue(final String name, final Object value) {
+  public void addEnumValue(final String name, final String value) {
     enumValues.add(new EnumValue(name, value));
   }
 

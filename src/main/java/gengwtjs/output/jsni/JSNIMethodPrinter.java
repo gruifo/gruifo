@@ -21,34 +21,50 @@ import gengwtjs.lang.java.JParam;
 import gengwtjs.lang.java.JavaFile;
 import gengwtjs.output.PrintUtil;
 
+/**
+ * Prints java methods.
+ */
 class JSNIMethodPrinter {
 
-  public void writeMethods(final StringBuffer buffer, final int indent,
+  public void printMethods(final StringBuffer buffer, final int indent,
       final JavaFile jFile) {
     for (final JMethod method : jFile.getMethods()) {
       PrintUtil.indent(buffer, method.getJsDoc(), indent);
       PrintUtil.indent(buffer, indent);
-      if (method.isComplex()) {
-        buffer.append("/*");
-      }
       buffer.append(appendAccessType(method.getAccessType()));
       buffer.append("final native ");
       if (method.getGenericType() != null) {
         buffer.append('<');
         buffer.append(method.getGenericType());
-        buffer.append(" extends JavaScriptObject> "); //FIXME
+        buffer.append(" extends JavaScriptObject> "); //FIXME not hardcode extends generics
       }
       buffer.append(method.getReturn());
       buffer.append(' ');
       buffer.append(method.getMethodName());
       buffer.append('(');
-      writeMethodParam(buffer, method, true);
+      printMethodParam(buffer, method, true);
       buffer.append(") /*-{");
       PrintUtil.nl(buffer);
-      writeMethodBody(buffer, indent + 1, method);
+      printMethodBody(buffer, indent + 1, method);
       PrintUtil.indent(buffer, indent);
       buffer.append("}-*/;");
       PrintUtil.nl2(buffer);
+    }
+  }
+
+  public static void printMethodParam(final StringBuffer buffer,
+      final JMethod method, final boolean withType) {
+    boolean first = true;
+    for (final JParam param : method.getParams()) {
+      if (!first) {
+        buffer.append(", ");
+      }
+      if (withType) {
+        buffer.append(param.getType());
+        buffer.append(' ');
+      }
+      buffer.append(param.getName());
+      first = false;
     }
   }
 
@@ -72,30 +88,14 @@ class JSNIMethodPrinter {
     return asType;
   }
 
-  private void writeMethodParam(final StringBuffer buffer, final JMethod method,
-      final boolean withType) {
-    boolean first = true;
-    for (final JParam param : method.getParams()) {
-      if (!first) {
-        buffer.append(", ");
-      }
-      if (withType) {
-        buffer.append(param.getType());
-        buffer.append(' ');
-      }
-      buffer.append(param.getName());
-      first = false;
-    }
-  }
-
-  private void writeMethodBody(final StringBuffer buffer, final int indent,
-      final JMethod method) {
+  private void printMethodBody(final StringBuffer buffer,
+      final int indent, final JMethod method) {
     PrintUtil.indent(buffer, indent);
     buffer.append("void".equals(method.getReturn()) ? "" : "return ");
     buffer.append("this.");
     buffer.append(method.getMethodName());
     buffer.append('(');
-    writeMethodParam(buffer, method, false);
+    printMethodParam(buffer, method, false);
     buffer.append(");");
     PrintUtil.nl(buffer);
   }

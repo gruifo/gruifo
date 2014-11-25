@@ -39,7 +39,7 @@ public class JavaScriptFileParserTest {
   public void testParseMethodName() {
     final JavaScriptFileParser parser = new JavaScriptFileParser("");
     final JsMethod method =
-        parser.parseMethod("this.is.a.Class.prototype.getEventPixel");
+        parser.parseMethod("this.is.a.Class.prototype.getEventPixel", false);
     assertEquals("Package name", "this.is.a.Class", method.getPackageName());
     assertEquals("Package name", "getEventPixel", method.getMethodName());
   }

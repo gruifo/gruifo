@@ -16,6 +16,7 @@
 package gengwtjs.output.jsni;
 
 import gengwtjs.lang.java.JClass;
+import gengwtjs.lang.java.JMethod;
 import gengwtjs.lang.java.JavaFile;
 import gengwtjs.lang.java.JavaFile.EnumValue;
 import gengwtjs.lang.js.JsFile;
@@ -43,8 +44,8 @@ public class JSNIPrinter implements FilePrinter {
     final int indent = 0;
     final StringBuffer buffer = new StringBuffer();
     buffer.append(jFile.getHeaderComment());
-    writePackageName(buffer, jFile.getPackageName());
-    writeImports(buffer, jFile.getImports());
+    printPackageName(buffer, jFile.getPackageName());
+    printImports(buffer, jFile.getImports());
     jFile.setStatic(false); //FIXME setting static should not be done here
     printJavaFile(jFile, indent, buffer);
     return buffer.toString();
@@ -52,15 +53,15 @@ public class JSNIPrinter implements FilePrinter {
 
   private void printJavaFile(final JavaFile jFile, int indent,
       final StringBuffer buffer) {
-    writeClass(buffer, (JClass) jFile, indent);
+    printClass(buffer, (JClass) jFile, indent);
     indent++;
-    writeEnumFields(buffer, jFile.getPackageName()
-        + "." + jFile.getClassOrInterfaceName(), jFile.getEnumValues());
+    printEnumFields(buffer, indent, jFile.getPackageName(),
+        jFile.getClassOrInterfaceName(), jFile.getEnumValues());
     if (jFile.getEnumValues().isEmpty()) {
-      writeConstructors(indent, buffer, (JClass) jFile);
+      printConstructors(indent, buffer, (JClass) jFile);
     }
-    fPrinter.writeFields(buffer, indent, jFile);
-    mPrinter.writeMethods(buffer, indent, jFile);
+    fPrinter.printFields(buffer, indent, jFile);
+    mPrinter.printMethods(buffer, indent, jFile);
     for (final JavaFile innerFile: jFile.getInnerJFiles()) {
       innerFile.setStatic(true); //FIXME setting static should not be done here
       printJavaFile(innerFile, indent, buffer);
@@ -69,7 +70,7 @@ public class JSNIPrinter implements FilePrinter {
     PrintUtil.nl(buffer);
   }
 
-  private void writePackageName(final StringBuffer buffer,
+  private void printPackageName(final StringBuffer buffer,
       final String packageName) {
     buffer.append("package ");
     buffer.append(packageName);
@@ -77,7 +78,7 @@ public class JSNIPrinter implements FilePrinter {
     PrintUtil.nl2(buffer);
   }
 
-  private void writeImports(final StringBuffer buffer, final Set<String> imports) {
+  private void printImports(final StringBuffer buffer, final Set<String> imports) {
     final ArrayList<String> importList = new ArrayList<>(imports);
     Collections.sort(importList);
     for (final String imp : importList) {
@@ -89,7 +90,7 @@ public class JSNIPrinter implements FilePrinter {
     PrintUtil.nl(buffer);
   }
 
-  private void writeClass(final StringBuffer buffer, final JClass jFile,
+  private void printClass(final StringBuffer buffer, final JClass jFile,
       final int indent) {
     PrintUtil.indent(buffer, jFile.getClassDescription(), indent);
     PrintUtil.indent(buffer, indent);
@@ -99,33 +100,16 @@ public class JSNIPrinter implements FilePrinter {
     }
     buffer.append("class ");
     buffer.append(jFile.getClassOrInterfaceName());
-    appendClassExtend(buffer, jFile.getClassGeneric());
+    printClassExtend(buffer, jFile.getClassGeneric());
     if (jFile instanceof JClass && jFile.getExtends() != null) {
       buffer.append(" extends ");
       buffer.append(jFile.getExtends());
     }
-    /*    if (jFile.isEnum()) {
-      // no extends
-    } else {
-      if (jFile.getElement().getExtends() == null
-          || jFile.getElement().getExtends().getType() == null) {
-        buffer.append(GWT_JAVA_SCRIPT_OBJECT);
-      } else {
-        final JsType type = jFile.getElement().getExtends();
-
-        //        if ("number".equals(type.getFullType())) {
-        //          buffer.append(GWT_JAVA_SCRIPT_OBJECT);
-        //        } else {
-        JSNIMethodPrinter.writeType(buffer, type);
-        //        }
-      }
-    }
-     */
     buffer.append(" {");
     PrintUtil.nl(buffer);
   }
 
-  private void appendClassExtend(final StringBuffer buffer, final String classGeneric) {
+  private void printClassExtend(final StringBuffer buffer, final String classGeneric) {
     if (classGeneric != null) {
       buffer.append('<');
       buffer.append(classGeneric);
@@ -135,59 +119,70 @@ public class JSNIPrinter implements FilePrinter {
     }
   }
 
-  private void writeEnumFields(final StringBuffer buffer,
-      final String fullClassName, final List<EnumValue> enumValues) {
+  private void printEnumFields(final StringBuffer buffer, final int indent,
+      final String packageName, final String className,
+      final List<EnumValue> enumValues) {
     for (final EnumValue enumValue : enumValues) {
-      buffer.append("\tpublic static final ");
-      if (enumValue.getValue() instanceof String) {
-        buffer.append("String ");
-      } else if (enumValue.getValue() instanceof Double) {
-        buffer.append("double ");
-      } else {
-        //        LOG.warn("something wrong: {}, {}", enumValue.getName(), enumValue.getValue());
-      }
+      PrintUtil.indent(buffer, indent);
+      buffer.append("public static final ");
+      buffer.append(enumValue.getType());
+      buffer.append(' ');
       buffer.append(enumValue.getName());
       buffer.append(" = get");
-      buffer.append(enumValue.getName().toLowerCase());
-      buffer.append("();\n");
+      buffer.append(
+          PrintUtil.firstCharUpper(enumValue.getName().toLowerCase()));
+      buffer.append("();");
+      PrintUtil.nl(buffer);
     }
-    buffer.append('\n');
+    PrintUtil.nl(buffer);
+    if (!enumValues.isEmpty()) {
+      // print private constructor.
+      printConstructor(buffer, indent, "private", className);
+    }
+    // print private native methods.
     for (final EnumValue enumValue : enumValues) {
-      buffer.append("\tprivate static native final ");
-      if (enumValue.getValue() instanceof String) {
-        buffer.append("String ");
-      } else if (enumValue.getValue() instanceof Double) {
-        buffer.append("double ");
-      } else {
-        //        LOG.warn("something wrong: {}, {}", enumValue.getName(), enumValue.getValue());
-      }
-      buffer.append("get");
-      buffer.append(enumValue.getName().toLowerCase());
-      buffer.append("() /*-{\n\t\t return $wnd.");
-      buffer.append(fullClassName);
-      buffer.append(".");
+      PrintUtil.indent(buffer, indent);
+      buffer.append("private static native final ");
+      buffer.append(' ');
+      buffer.append(enumValue.getType());
+      buffer.append(" get");
+      buffer.append(
+          PrintUtil.firstCharUpper(enumValue.getName().toLowerCase()));
+      buffer.append("() /*-{");
+      PrintUtil.nl(buffer);
+      PrintUtil.indent(buffer, indent+1);
+      buffer.append("return $wnd.");
+      buffer.append(packageName + "." + className);
+      buffer.append('.');
       buffer.append(enumValue.getName());
-      buffer.append(";\n\t}-*/;\n");
+      buffer.append(';');
+      PrintUtil.nl(buffer);
+      PrintUtil.indent(buffer, indent);
+      buffer.append("}-*/;");
+      PrintUtil.nl(buffer);
     }
   }
 
-
-  // FIXME constructors with arguments.
-  private void writeConstructors(final int indent, final StringBuffer buffer,
+  private void printConstructors(final int indent, final StringBuffer buffer,
       final JClass jFile) {
-    if (jFile.isDataClass()) {
-      writeConstructorsDataClass(indent, buffer, jFile);
-    } else {
-      writeConstructorCreator(indent, buffer, jFile);
-      writeProtectedConstructor(indent, buffer, jFile);
+    for (final JMethod constructor : jFile.getConstructors()) {
+      if (jFile.isDataClass()) {
+        printConstructorsDataClass(indent, buffer, jFile);
+      } else {
+        printConstructorCreator(indent, buffer, jFile, constructor);
+      }
+    }
+    if (!jFile.isDataClass()) {
+      printConstructor(
+          buffer, indent, "protected", jFile.getClassOrInterfaceName());
     }
   }
 
-  private void writeConstructorCreator(int indent, final StringBuffer buffer,
-      final JClass jFile) {
+  private void printConstructorCreator(int indent, final StringBuffer buffer,
+      final JClass jFile, final JMethod constructor) {
     PrintUtil.indent(buffer, indent);
     buffer.append("public static native ");
-    appendClassExtend(buffer, jFile.getClassGeneric());
+    printClassExtend(buffer, jFile.getClassGeneric());
     buffer.append(jFile.getClassOrInterfaceName());
     if (jFile.getClassGeneric() != null) {
       buffer.append('<');
@@ -196,7 +191,9 @@ public class JSNIPrinter implements FilePrinter {
     }
     buffer.append(" new");
     buffer.append(PrintUtil.firstCharUpper(jFile.getClassOrInterfaceName()));
-    buffer.append("() /*-{");
+    buffer.append('(');
+    JSNIMethodPrinter.printMethodParam(buffer, constructor, true);
+    buffer.append(") /*-{");
     PrintUtil.nl(buffer);
     PrintUtil.indent(buffer, ++indent);
     buffer.append("return new $wnd.");
@@ -206,7 +203,7 @@ public class JSNIPrinter implements FilePrinter {
     }
     buffer.append(jFile.getClassOrInterfaceName());
     buffer.append('(');
-    // FIXME write parameters
+    JSNIMethodPrinter.printMethodParam(buffer, constructor, false);
     buffer.append(");");
     PrintUtil.nl(buffer);
     PrintUtil.indent(buffer, --indent);
@@ -215,22 +212,24 @@ public class JSNIPrinter implements FilePrinter {
   }
 
   /**
-   * Generate protected constructor.
-   * @param indent
+   * Generate constructor without arguments.
    * @param buffer
-   * @param jFile
+   * @param indent
+   * @param accessType
+   * @param name name of the constructor
    */
-  private void writeProtectedConstructor(final int indent,
-      final StringBuffer buffer, final JClass jFile) {
+  private void printConstructor(final StringBuffer buffer,
+      final int indent, final String accessType, final String name) {
     PrintUtil.indent(buffer, indent);
-    buffer.append("protected ");
-    buffer.append(jFile.getClassOrInterfaceName());
-    buffer.append("(){ }");
+    buffer.append(accessType);
+    buffer.append(' ');
+    buffer.append(name);
+    buffer.append("() { }");
     PrintUtil.nl2(buffer);
   }
 
-  private void writeConstructorsDataClass(final int indent, final StringBuffer buffer,
-      final JClass jFile) {
+  private void printConstructorsDataClass(final int indent,
+      final StringBuffer buffer, final JClass jFile) {
     PrintUtil.indent(buffer, indent);
     buffer.append("public ");
     buffer.append(jFile.getClassOrInterfaceName());
