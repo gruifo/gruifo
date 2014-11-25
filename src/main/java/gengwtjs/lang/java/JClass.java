@@ -23,6 +23,7 @@ public class JClass extends JavaFile {
   private final List<JMethod> constructors = new ArrayList<>();
   private String _extends;
   private String classGeneric;
+  private boolean dataClass;
 
   public JClass(final String packageName, final String className) {
     super(packageName, className);
@@ -44,12 +45,21 @@ public class JClass extends JavaFile {
     return _extends;
   }
 
+  public boolean isDataClass() {
+    return dataClass;
+  }
+
   public void setClassGeneric(final String classGeneric) {
     this.classGeneric = classGeneric;
 
   }
 
+  public void setDataClass(final boolean dataClass) {
+    this.dataClass = dataClass;
+  }
+
   public void setExtends(final String _extends) {
     this._extends = _extends;
   }
+
 }

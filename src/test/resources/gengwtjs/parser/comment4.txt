@@ -1,0 +1,4 @@
+/**
+ * @typedef {{magFilter: number, minFilter: number, texture: WebGLTexture}}
+ */
+ 

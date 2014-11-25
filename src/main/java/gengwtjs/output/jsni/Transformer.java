@@ -49,14 +49,15 @@ class Transformer {
     final JClass jFile =
         new JClass(jsFile.getPackageName(), jsFile.getClassOrInterfaceName());
     addImports(jFile);
-    setExtends(jFile, jsFile);
     jFile.setClassDescription(jsFile.getElement().getJsDoc());
     for (final JsFile subFile: jsFile.getInnerJFiles()) {
       jFile.addInnerJFile(transform(subFile));
     }
     if (jsFile.getElement().getTypeDef() instanceof List) {
       transformFields(jFile, (List<JsParam>) jsFile.getElement().getTypeDef());
+      jFile.setDataClass(true);
     }
+    setExtends(jFile, jsFile);
     transformFields(jFile, jsFile.getFields());
     for(final JsMethod jsMethod: jsFile.getMethods()) {
       if (!ignoreMethod(jsMethod)) {
@@ -85,9 +86,11 @@ class Transformer {
       jFile.setClassGeneric(
           TypeMapper.INSTANCE.mapType(jsFile.getElement().getGenericType()));
     }
-    jFile.setExtends(extendsType == null
-        ? TypeMapper.GWT_JAVA_SCRIPT_OBJECT
-            : transformType(extendsType));
+    if (!jFile.isDataClass()) {
+      jFile.setExtends(extendsType == null
+          ? TypeMapper.GWT_JAVA_SCRIPT_OBJECT
+              : transformType(extendsType));
+    }
   }
 
   private void transformFields(final JClass jFile, final List<JsParam> jsFields) {

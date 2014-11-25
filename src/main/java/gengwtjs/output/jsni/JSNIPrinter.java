@@ -100,10 +100,9 @@ public class JSNIPrinter implements FilePrinter {
     buffer.append("class ");
     buffer.append(jFile.getClassOrInterfaceName());
     appendClassExtend(buffer, jFile.getClassGeneric());
-    if (jFile instanceof JClass) {
+    if (jFile instanceof JClass && jFile.getExtends() != null) {
       buffer.append(" extends ");
       buffer.append(jFile.getExtends());
-      buffer.append(' ');
     }
     /*    if (jFile.isEnum()) {
       // no extends
@@ -122,7 +121,7 @@ public class JSNIPrinter implements FilePrinter {
       }
     }
      */
-    buffer.append('{');
+    buffer.append(" {");
     PrintUtil.nl(buffer);
   }
 
@@ -172,10 +171,16 @@ public class JSNIPrinter implements FilePrinter {
     }
   }
 
+
+  // FIXME constructors with arguments.
   private void writeConstructors(final int indent, final StringBuffer buffer,
       final JClass jFile) {
-    writeConstructorCreator(indent, buffer, jFile);
-    writeProtectedConstructor(indent, buffer, jFile);
+    if (jFile.isDataClass()) {
+      writeConstructorsDataClass(indent, buffer, jFile);
+    } else {
+      writeConstructorCreator(indent, buffer, jFile);
+      writeProtectedConstructor(indent, buffer, jFile);
+    }
   }
 
   private void writeConstructorCreator(int indent, final StringBuffer buffer,
@@ -219,6 +224,15 @@ public class JSNIPrinter implements FilePrinter {
       final StringBuffer buffer, final JClass jFile) {
     PrintUtil.indent(buffer, indent);
     buffer.append("protected ");
+    buffer.append(jFile.getClassOrInterfaceName());
+    buffer.append("(){ }");
+    PrintUtil.nl2(buffer);
+  }
+
+  private void writeConstructorsDataClass(final int indent, final StringBuffer buffer,
+      final JClass jFile) {
+    PrintUtil.indent(buffer, indent);
+    buffer.append("public ");
     buffer.append(jFile.getClassOrInterfaceName());
     buffer.append("(){ }");
     PrintUtil.nl2(buffer);
