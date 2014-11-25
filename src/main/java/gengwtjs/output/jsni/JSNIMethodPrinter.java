@@ -32,7 +32,7 @@ class JSNIMethodPrinter {
         buffer.append("/*");
       }
       buffer.append(appendAccessType(method.getAccessType()));
-      buffer.append("native ");
+      buffer.append("final native ");
       if (method.getGenericType() != null) {
         buffer.append('<');
         buffer.append(method.getGenericType());

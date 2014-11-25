@@ -36,7 +36,7 @@ public class JSNIFieldPrinter {
       final JParam field) {
     PrintUtil.indent(buffer, field.getJavaDoc(), indent);
     PrintUtil.indent(buffer, indent);
-    buffer.append("public native ");
+    buffer.append("public final native ");
     buffer.append(field.getType());
     buffer.append(" get");
     buffer.append(PrintUtil.firstCharUpper(field.getName()));
@@ -56,7 +56,7 @@ public class JSNIFieldPrinter {
       final JParam field) {
     PrintUtil.indent(buffer, field.getJavaDoc(), indent);
     PrintUtil.indent(buffer, indent);
-    buffer.append("public native void");
+    buffer.append("public final native void");
     buffer.append(" set");
     buffer.append(PrintUtil.firstCharUpper(field.getName()));
     buffer.append('(');
