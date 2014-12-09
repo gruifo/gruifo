@@ -43,7 +43,7 @@ gwt-unitCache/
 
 #gwt junit compilation files
 www-test/
-/target
+target/
 
 # Git merge files    #
 ######################

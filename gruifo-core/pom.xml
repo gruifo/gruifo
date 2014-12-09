@@ -4,8 +4,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>nl.h72</groupId>
   <artifactId>gen-gwt-wrapper-js</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
   <name>gen-gwt-wrapper-js</name>
+
   <dependencies>
     <dependency>
       <groupId>org.mozilla</groupId>
@@ -26,6 +27,11 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <version>1.7.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>3.2.3</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
