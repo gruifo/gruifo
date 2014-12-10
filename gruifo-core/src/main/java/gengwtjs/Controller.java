@@ -18,6 +18,8 @@ package gengwtjs;
 import gengwtjs.lang.js.JsElement.JsParam;
 import gengwtjs.lang.js.JsFile;
 import gengwtjs.output.FilePrinter;
+import gengwtjs.output.jsinterface.JsInterfacePrinter;
+import gengwtjs.output.jsni.JSNIPrinter;
 import gengwtjs.parser.JavaScriptFileParser;
 
 import java.io.File;
@@ -41,7 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Control flow from parsing to generating output files.
  */
-class Controller {
+public class Controller {
 
   private static final String JAVA_SCRIPT_EXT = "js";
   private static final String JAVA_EXT = ".java";
@@ -56,7 +58,19 @@ class Controller {
     this.outputPath = outputPath;
   }
 
-  void run(final FilePrinter printer) {
+  public void run(final OutputType outputType) {
+    final FilePrinter fp;
+    if (outputType == OutputType.JSI) {
+      fp = new JsInterfacePrinter();
+    } else if (outputType == OutputType.JSNI) {
+      fp = new JSNIPrinter();
+    } else {
+      throw new RuntimeException("Output type '" + outputType + "' not supported");
+    }
+    run(fp);
+  }
+
+  public void run(final FilePrinter printer) {
     final List<File> files = new ArrayList<>();
     for (final File srcPath : srcPaths) {
       scanJsFiles(files, srcPath);

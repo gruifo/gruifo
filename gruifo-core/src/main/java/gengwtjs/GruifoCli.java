@@ -27,9 +27,9 @@ import org.apache.commons.cli.ParseException;
 /**
  * Main class.
  */
-public final class Main {
+public final class GruifoCli {
 
-  private Main() {
+  private GruifoCli() {
     // main class, only static access.
   }
 

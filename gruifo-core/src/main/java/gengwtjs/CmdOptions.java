@@ -39,14 +39,13 @@ class CmdOptions {
 
   private static final String HELP = "help";
   private static final String JSNI = "JSNI";
-  private static final String JSINTERFACE = "JSInterface";
+  private static final String JSINTERFACE = "JSI";
   private static final String SRC_PATH = "src";
   private static final String SRC_PATH_ARG = "directory;...";
   private static final String TARGET_PATH = "target";
   private static final String TARGET_PATH_ARG = "directory";
   private static final String TYPE_MAPPING = "type_mapping";
   private static final String TYPE_MAPPING_ARG = "file";
-
 
   private static final Option HELP_OPTION =
       new Option(HELP, "print this message");
@@ -76,6 +75,7 @@ class CmdOptions {
     TARGET_PATH_OPTION.setRequired(true);
     options.addOption(TARGET_PATH_OPTION);
     options.addOption(TYPE_MAPPING_OPTION);
+    TYPE_MAPPING_OPTION.setArgName(TYPE_MAPPING_ARG);
     final CommandLineParser parser = new GnuParser();
     cmd = parser.parse(options, args);
   }

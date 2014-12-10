@@ -1,4 +1,4 @@
-gen-gwt-wrapper-js
+gruifo
 ==================
 
 Generating GWT wrappers for and from JavaScript libraries.

@@ -16,6 +16,7 @@
   <properties>
     <maven.version>3.2.3</maven.version>
     <mavenPluginTools>3.2</mavenPluginTools>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencyManagement>
