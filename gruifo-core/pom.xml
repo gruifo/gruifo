@@ -2,10 +2,15 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
   <modelVersion>4.0.0</modelVersion>
-  <groupId>nl.h72</groupId>
-  <artifactId>gen-gwt-wrapper-js</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <name>gen-gwt-wrapper-js</name>
+
+  <parent>
+    <groupId>gruifo</groupId>  
+    <artifactId>gruifo-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  
+  <artifactId>gruifo-core</artifactId>
+  <name>gruifo-core</name>
 
   <dependencies>
     <dependency>
@@ -21,12 +26,10 @@
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-      <version>1.2.16</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.5</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -36,23 +39,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3.2</version>
-          <configuration>
-            <source>1.7</source>
-            <target>1.7</target>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>
