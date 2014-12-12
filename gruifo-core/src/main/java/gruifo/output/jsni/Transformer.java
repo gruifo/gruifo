@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
  * Transforms JavaScript into Java.
  */
 class Transformer {
-  private static final String GWT_JSNI_PACKAGE = "com.google.gwt.core.client.";
   private static final Logger LOG = LoggerFactory.getLogger(Transformer.class);
 
   private final Set<String> ignoreMethods = new HashSet<>();
@@ -95,8 +94,6 @@ class Transformer {
   }
 
   private void addImports(final JavaFile javaFile) {
-    javaFile.getImports().add(
-        GWT_JSNI_PACKAGE + TypeMapper.GWT_JAVA_SCRIPT_OBJECT);
   }
 
   private void setExtends(final JClass jFile, final JsFile jsFile) {

@@ -21,7 +21,9 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 public final class TypeMapper {
-  static final String GWT_JAVA_SCRIPT_OBJECT = "JavaScriptObject";
+  private static final String GWT_JSNI_PACKAGE = "com.google.gwt.core.client.";
+  static final String GWT_JAVA_SCRIPT_OBJECT =
+      GWT_JSNI_PACKAGE + "JavaScriptObject";
 
   public static final TypeMapper INSTANCE = new TypeMapper();
 

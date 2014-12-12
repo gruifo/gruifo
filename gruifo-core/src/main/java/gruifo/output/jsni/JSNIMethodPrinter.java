@@ -36,7 +36,9 @@ class JSNIMethodPrinter {
       if (method.getGenericType() != null) {
         buffer.append('<');
         buffer.append(method.getGenericType());
-        buffer.append(" extends JavaScriptObject> "); //FIXME not hardcode extends generics
+        buffer.append(" extends ");
+        buffer.append(TypeMapper.GWT_JAVA_SCRIPT_OBJECT); //FIXME not hardcode extends generics
+        buffer.append("> ");
       }
       buffer.append(method.getReturn());
       buffer.append(' ');

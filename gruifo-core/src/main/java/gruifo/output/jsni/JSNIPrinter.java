@@ -83,7 +83,7 @@ public class JSNIPrinter implements FilePrinter {
     Collections.sort(importList);
     for (final String imp : importList) {
       buffer.append("import ");
-      buffer.append(typeMapper.mapType(imp));
+      buffer.append(imp);
       buffer.append(';');
       PrintUtil.nl(buffer);
     }
