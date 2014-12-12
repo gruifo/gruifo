@@ -15,9 +15,9 @@
  */
 package gruifo.mojo;
 
-import gengwtjs.Controller;
-import gengwtjs.OutputType;
-import gengwtjs.output.jsni.TypeMapper;
+import gruifo.Controller;
+import gruifo.OutputType;
+import gruifo.output.jsni.TypeMapper;
 
 import java.io.File;
 import java.io.FileInputStream;
