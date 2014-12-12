@@ -22,7 +22,7 @@ import java.util.List;
 
 public class JsFile {
 
-  private final List<String> enumValues = new ArrayList<>();
+  private final List<JsEnum> enumValues = new ArrayList<>();
   private final List<JsConst> constants = new ArrayList<>();
   private final List<JsParam> fields = new ArrayList<>();
   private final List<JsMethod> methods = new ArrayList<>();
@@ -43,8 +43,8 @@ public class JsFile {
     constants.add(new JsConst(constName, element));
   }
 
-  public void addEnumValue(final String name) {
-    enumValues.add(name);
+  public void addEnumValue(final String name, final String jsDoc) {
+    enumValues.add(new JsEnum(name, jsDoc));
   }
 
   public void addField(final JsParam field) {
@@ -71,7 +71,7 @@ public class JsFile {
     return element;
   }
 
-  public List<String> getEnumValues() {
+  public List<JsEnum> getEnumValues() {
     return enumValues;
   }
 

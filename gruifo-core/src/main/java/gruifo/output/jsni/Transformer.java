@@ -19,10 +19,11 @@ import gruifo.lang.java.JClass;
 import gruifo.lang.java.JMethod;
 import gruifo.lang.java.JParam;
 import gruifo.lang.java.JavaFile;
+import gruifo.lang.js.JsElement.JsParam;
+import gruifo.lang.js.JsEnum;
 import gruifo.lang.js.JsFile;
 import gruifo.lang.js.JsMethod;
 import gruifo.lang.js.JsType;
-import gruifo.lang.js.JsElement.JsParam;
 import gruifo.lang.js.JsType.JsTypeSpec;
 
 import java.util.ArrayList;
@@ -54,8 +55,8 @@ class Transformer {
     for (final JsFile subFile: jsFile.getInnerJFiles()) {
       jFile.addInnerJFile(transform(subFile));
     }
-    if (jsFile.getElement().getTypeDef() instanceof List) {
-      transformFields(jFile, (List<JsParam>) jsFile.getElement().getTypeDef());
+    if (!jsFile.getElement().getTypeDef().isEmpty()) {
+      transformFields(jFile, jsFile.getElement().getTypeDef());
       jFile.setDataClass(true);
     }
     setExtends(jFile, jsFile);
@@ -67,9 +68,10 @@ class Transformer {
   }
 
   private void transformEnumFields(final JClass jFile, final JsType enumType,
-      final List<String> enumValues) {
-    for (final String enumValue: enumValues) {
-      jFile.addEnumValue(enumValue, transformType(enumType));
+      final List<JsEnum> list) {
+    for (final JsEnum enumValue: list) {
+      jFile.addEnumValue(enumValue.getFieldName(), transformType(enumType),
+          enumValue.getJsDoc());
     }
   }
 
@@ -195,6 +197,7 @@ class Transformer {
     }
     return type;
   }
+
   private String transformType(final JsTypeSpec jsTypeSpec,
       final boolean generic) {
     String type = "";

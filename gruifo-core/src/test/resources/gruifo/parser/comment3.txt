@@ -1,30 +1,4 @@
 /**
- * @const
- * @enum {number}
+ * @typedef {{magFilter: number, minFilter: number, texture: WebGLTexture}}
  */
-com.alphabet.OMEGA.Rho = {
-  ALFA: 1,
-  BETA: 2,
-  GAMMA: 3,
-  DELTA: 4,
-  EPSILON: 5,
-  ZET: 6
-};
-
-
-  public enum TokenType {
-    ALPHA;
-
-    public double getValue() {
-      return getValueImpl(name());
-    }
-
-    private native double getValueImpl(String key) /*-{
-    return $win.com.alphabet.OMEGA.Rho[key];
-  }-*/;
-
-  use:
-  
-  function(param name) /*-{
-    $win.hallo.y(name.getValue());
-  }-*/;
+ 

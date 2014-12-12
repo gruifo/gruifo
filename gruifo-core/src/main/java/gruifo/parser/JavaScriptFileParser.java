@@ -16,9 +16,9 @@
 package gruifo.parser;
 
 import gruifo.lang.js.JsElement;
+import gruifo.lang.js.JsElement.JsParam;
 import gruifo.lang.js.JsFile;
 import gruifo.lang.js.JsMethod;
-import gruifo.lang.js.JsElement.JsParam;
 import gruifo.output.PrintUtil;
 
 import java.util.Collection;
@@ -119,16 +119,16 @@ public class JavaScriptFileParser implements NodeVisitor {
     if (element == null || element.isPrivate()) {
       return; // ignore private stuff...
     }
-    //    LOG.error("Enum: {}, {}", enumName, element);
     if (element.isEnum()) {
       final JsFile jsFile = parseClassOrInterfaceName(enumName, false);
       jsFile.setElement(element);
+
       files.put(enumName, jsFile);
       if (astNode instanceof ObjectLiteral) {
         final ObjectLiteral ol = (ObjectLiteral) astNode;
         for (final ObjectProperty op : ol.getElements()) {
           final Name left = (Name) op.getLeft();
-          jsFile.addEnumValue(left.toSource());
+          jsFile.addEnumValue(left.toSource(), left.getJsDoc());
         }
         // LOG.warn("Yes this is a ArrayLiteral: {} in file: {}", enumName,
         // fileName);
@@ -149,7 +149,8 @@ public class JavaScriptFileParser implements NodeVisitor {
   private void visitMethodOrClass(final String methodOrClassName,
       final String jsDoc, final FunctionNode right) {
     if (jsDoc == null) {
-      LOG.error("Comment in for {} file {} is empty.", methodOrClassName, fileName);
+      LOG.error("Comment in for {} file {} is empty.",
+          methodOrClassName, fileName);
       return;
     }
     final JsElement element = parser.parse(fileName, jsDoc);
@@ -163,6 +164,7 @@ public class JavaScriptFileParser implements NodeVisitor {
       }
       final JsFile jFile = parseClassOrInterfaceName(methodOrClassName,
           element.isInterface());
+
       jFile.setElement(element);
       files.put(methodOrClassName, jFile);
       addMethodOrField(methodOrClassName, element, true);

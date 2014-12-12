@@ -82,7 +82,7 @@ public class JsElement {
   private String jsDoc;
   private JsType _extends;
   private final List<JsParam> params = new ArrayList<>();
-  private Object typeDef;
+  private List<JsParam> typeDef = new ArrayList<>();
   private JsType type;
   private JsType _return;
   private boolean override;
@@ -122,7 +122,7 @@ public class JsElement {
     return type;
   }
 
-  public Object getTypeDef() {
+  public List<JsParam> getTypeDef() {
     return typeDef;
   }
 
@@ -174,10 +174,6 @@ public class JsElement {
     return accessType == AccessType.PROTECTED;
   }
 
-  //  public void setClass() {
-  //    elementType = ElementType.CLASS;
-  //  }
-
   public void setClassDesc() {
     classDesc = true;
   }
@@ -188,7 +184,6 @@ public class JsElement {
 
   public void setConstructor() {
     elementType = ElementType.CONSTRUCTOR;
-    //    setClass();
   }
 
   public void setDefine(final JsType define) {
@@ -227,7 +222,6 @@ public class JsElement {
 
   public void setPrivate() {
     accessType = AccessType.PRIVATE;
-    //FIXME:    this._private = !(isClass() || isInterface());
   }
 
   public void setProtected() {
@@ -242,11 +236,10 @@ public class JsElement {
     this.type = type;
   }
 
-  public void setTypeDef(final Object typeDef) {
+  public void setTypeDef(final List<JsParam> typeDef) {
     this.typeDef = typeDef;
     if (elementType != null) {
       LOG.error("ElementType already set: {}", elementType);
-      //    elementType = ElementType.TYPEDEF;
     }
   }
   @Override

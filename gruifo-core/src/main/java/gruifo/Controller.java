@@ -15,8 +15,8 @@
  */
 package gruifo;
 
-import gruifo.lang.js.JsFile;
 import gruifo.lang.js.JsElement.JsParam;
+import gruifo.lang.js.JsFile;
 import gruifo.output.FilePrinter;
 import gruifo.output.jsinterface.JsInterfacePrinter;
 import gruifo.output.jsni.JSNIPrinter;
@@ -120,15 +120,12 @@ public class Controller {
 
   private Collection<JsFile> prepareFields(final Collection<JsFile> files) {
     for (final JsFile jsFile : files) {
-      if (jsFile.getElement().getTypeDef() instanceof List) {
-        final List<JsParam> typeDef =
-            (List<JsParam>) jsFile.getElement().getTypeDef();
-        for (final JsParam field : jsFile.getFields()) {
-          for (int i = 0; i < typeDef.size(); i++) {
-            if (field.getName().equals(typeDef.get(i).getName())) {
-              typeDef.remove(i);
-              break;
-            }
+      final List<JsParam> typeDef = jsFile.getElement().getTypeDef();
+      for (final JsParam field : jsFile.getFields()) {
+        for (int i = 0; i < typeDef.size(); i++) {
+          if (field.getName().equals(typeDef.get(i).getName())) {
+            typeDef.remove(i);
+            break;
           }
         }
       }

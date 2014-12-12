@@ -1,0 +1,36 @@
+/**
+ * This is a test comment.
+ * @api
+ * @class
+ * @classdesc
+ * @constructor
+ * @extends {nl.Object}
+ * @fires nl.Event
+ * @inheritDoc
+ * @observable
+ * @param {nl.Options} options standard parameter.
+ * @param {function(this: S, nl.Param1, nl.Param2): T} function function parameter 
+ * @param {Array.<*>} arr Array.
+ * @param {Array.<T>=} opt_array Array.
+ * @param {Object.<Object.<string, nl.Attribution>, string>} attributions.
+ * @param {?nl.State} stateNull state of null parameter.
+ * @param {!nl.State} stateNonNull state not null parameter.
+ * @param {...nl.Varargs} var_args variable arguments parameter.
+ * @param {S=} opt_this .
+ * @param {*} any any type
+ * @param {?} anyNull any type, no type checking
+ * @param {Object.<string, *>}  string_objects
+ * @private
+ * @protected
+ * @return {nl.Object|undefined}
+ * @template S,T,U
+ * @type {string}
+ * @type {A|B}
+ * @type {Array.<nl.Var>}
+ * @type {!Array.<?number>}
+ * @type {!(Array.<?number>|undefined)} 
+ * @type {Object.<string, *>} 
+ * @type {Array.<ol.RendererType>}
+ * @typedef {Array.<number>}
+ */
+ 

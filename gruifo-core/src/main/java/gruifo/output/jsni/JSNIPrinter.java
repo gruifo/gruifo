@@ -123,6 +123,7 @@ public class JSNIPrinter implements FilePrinter {
       final String packageName, final String className,
       final List<EnumValue> enumValues) {
     for (final EnumValue enumValue : enumValues) {
+      PrintUtil.indent(buffer, enumValue.getJavaDoc(), indent);
       PrintUtil.indent(buffer, indent);
       buffer.append("public static final ");
       buffer.append(enumValue.getType());
@@ -132,9 +133,8 @@ public class JSNIPrinter implements FilePrinter {
       buffer.append(
           PrintUtil.firstCharUpper(enumValue.getName().toLowerCase()));
       buffer.append("();");
-      PrintUtil.nl(buffer);
+      PrintUtil.nl2(buffer);
     }
-    PrintUtil.nl(buffer);
     if (!enumValues.isEmpty()) {
       // print private constructor.
       printConstructor(buffer, indent, "private", className);

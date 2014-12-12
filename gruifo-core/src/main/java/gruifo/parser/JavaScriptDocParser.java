@@ -16,11 +16,9 @@
 package gruifo.parser;
 
 import gruifo.lang.js.JsElement;
-import gruifo.lang.js.JsType;
 import gruifo.lang.js.JsElement.JsParam;
+import gruifo.lang.js.JsType;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +29,8 @@ import org.slf4j.LoggerFactory;
  * Parses the annotations in the JavaScript doc.
  */
 public class JavaScriptDocParser {
-  private static final Logger LOG = LoggerFactory.getLogger(JavaScriptDocParser.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(JavaScriptDocParser.class);
 
   /**
    * Annotation: @api
@@ -145,13 +144,12 @@ public class JavaScriptDocParser {
   private static final String TYPE = "type";
   private static final String TYPEDEF = "typedef";
 
-  private static final Pattern ANNOTATION_PATTERN = Pattern.compile("@([^ ]+) ?.*");
-  private static final Pattern TYPE_DEF_PATTERN =
-      Pattern.compile("\\{\\{(.*)\\}\\}");
-  private static final Pattern TYPE_DEF_PARAM_PATTERN =
-      Pattern.compile("([^:]+): *(.+)");
+  private static final Pattern ANNOTATION_PATTERN =
+      Pattern.compile("@([^ ]+) ?.*");
 
   private final JsTypeParser jsTypeParser = new JsTypeParser();
+  private final JsDocTypedefParser typedefParser =
+      new JsDocTypedefParser(jsTypeParser);
 
   public JsElement parse(final String fileName, final String comment) {
     final JsElement doc = new JsElement();
@@ -191,7 +189,7 @@ public class JavaScriptDocParser {
         doc.setMethod();
         break;
       case IMPLEMENTS:
-        LOG.error("TODO IMPLEMENTS in {}", fileName);
+        LOG.error("TODO 'IMPLEMENTS' in {}", fileName);
         break;
       case INHERITDOC:
       case OVERRIDE:
@@ -224,7 +222,7 @@ public class JavaScriptDocParser {
         //LOG.error("Annotation template not supported, found in file:{}", annotation, fileName);
         break;
       case TYPEDEF:
-        i = parseTypeDef(doc, lines, i, fileName);
+        i = typedefParser.parseTypeDef(doc, lines, i, fileName);
         break;
       case API:
       case DEPRECATED:
@@ -258,7 +256,7 @@ public class JavaScriptDocParser {
   }
 
   private JsParam parseParam(final String line, final String fileName) {
-    final Pattern pattern = Pattern.compile("\\{(.+)\\} +([^ ]+)");
+    final Pattern pattern = Pattern.compile("\\{([^\\}]+)\\} +([^ ]+)");
     final Matcher matcher = pattern.matcher(line);
     final JsParam param = new JsParam();
     if (matcher.find()) {
@@ -281,56 +279,5 @@ public class JavaScriptDocParser {
     final Pattern pattern = Pattern.compile("\\{([^\\}]+)\\}");
     final Matcher matcher = pattern.matcher(line);
     return matcher.find() ? jsTypeParser.parseType(matcher.group(1).trim()) : null;
-  }
-
-  private int parseTypeDef(final JsElement doc, final String[] lines, int i,
-      final String fileName) {
-    if (lines[i].contains("{{")) {
-      i = parseTypeClass(doc, lines, i, fileName);
-    } else {
-      doc.setTypeDef(parseType(lines[i], fileName));
-    }
-    return i;
-  }
-
-  private int parseTypeClass(final JsElement doc, final String[] lines, int i,
-      final String fileName) {
-    final List<JsParam> fields = new ArrayList<>();
-    final String split = "#@#";
-    final StringBuffer sb = new StringBuffer(stripAndReplace(lines[i], split));
-    for(; !lines[i].contains("}}"); i++) {
-      sb.append(stripAndReplace(lines[i+1], split));
-    }
-    final Matcher tdp = TYPE_DEF_PATTERN.matcher(sb.toString());
-    if (tdp.find()) {
-      for (final String param : tdp.group(1).split(split)) {
-        final Matcher matcher = TYPE_DEF_PARAM_PATTERN.matcher(param);
-        if (matcher.find()) {
-          final JsParam field = new JsParam();
-          field.setName(matcher.group(1).trim());
-          field.setType(jsTypeParser.parseType((matcher.group(2).trim())));
-          fields.add(field);
-        } else {
-          LOG.error("Missing typedef variable pattern, {} in file {}",
-              param, fileName);
-        }
-      }
-    } else {
-      LOG.error("Missing typedef pattern, {} in file {}",
-          sb.toString().trim(), fileName);
-    }
-    doc.setTypeDef(fields);
-    return i;
-  }
-
-  /**
-   * Replace comment * at beginning of line and replace comma at end of line
-   * with a unique pattern used to split de fields.
-   * @param string
-   * @param split
-   * @return
-   */
-  private String stripAndReplace(final String string, final String split) {
-    return string.replaceFirst("^ +\\*", "").replaceFirst(", *$", split);
   }
 }

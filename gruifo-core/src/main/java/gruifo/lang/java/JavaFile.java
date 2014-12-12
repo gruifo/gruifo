@@ -22,12 +22,17 @@ import java.util.Set;
 
 public class JavaFile {
   public static class EnumValue {
+    private final String javaDoc;
     private final String name;
     private final String type;
 
-    public EnumValue(final String name, final String type) {
+    public EnumValue(final String name, final String type, final String javaDoc) {
       this.name = name;
       this.type = type;
+      this.javaDoc = javaDoc;
+    }
+    public String getJavaDoc() {
+      return javaDoc;
     }
     public String getName() {
       return name;
@@ -55,8 +60,9 @@ public class JavaFile {
     this._interface = false; //FIXME;
   }
 
-  public void addEnumValue(final String name, final String value) {
-    enumValues.add(new EnumValue(name, value));
+  public void addEnumValue(final String name, final String value,
+      final String jsDoc) {
+    enumValues.add(new EnumValue(name, value, jsDoc));
   }
 
   public JParam addField(final String name, final String type) {
