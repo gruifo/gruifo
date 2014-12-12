@@ -1,9 +1,5 @@
 *.class
 
-# eclipse project files
-.project
-.classpath
-
 # Package Files #
 *.jar
 *.war
@@ -16,7 +12,6 @@
 Thumbs.db
 
 # gwt caches and compiled units #
-war/gwt_bree/
 gwt-unitCache/
 
 # Eclipse files and generated file     #

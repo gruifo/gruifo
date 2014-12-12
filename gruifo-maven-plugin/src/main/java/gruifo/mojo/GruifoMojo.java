@@ -106,7 +106,8 @@ public class GruifoMojo extends AbstractMojo {
     for (final String include : includes) {
       getLog().info("found file(s):" + include);
       final File file = new File(include);
-      final File actualFile = file.isAbsolute() ? file : new File(project.getBasedir(), include);
+      final File actualFile =
+          file.isAbsolute() ? file : new File(project.getBasedir(), include);
       if (actualFile.exists()) {
         srcFiles.add(actualFile);
       } else {
