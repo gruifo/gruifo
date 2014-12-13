@@ -17,7 +17,7 @@ package gruifo.lang.java;
 
 public class JParam {
 
-  private final String type;
+  private String type;
   private String name;
   private boolean optional;
   private boolean varargs;
@@ -58,5 +58,9 @@ public class JParam {
 
   public void setOptional(final boolean optional) {
     this.optional = optional;
+  }
+
+  public void setType(final String type) {
+    this.type = type;
   }
 }

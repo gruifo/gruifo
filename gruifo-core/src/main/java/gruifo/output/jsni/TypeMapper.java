@@ -33,6 +33,7 @@ public final class TypeMapper {
   private final Map<String, String> nativeMapper = new HashMap<>();
   private final Map<String, String> genericMapper = new HashMap<>();
   private final Set<String> ignores = new HashSet<>();
+  private final Map<String, String> replaceTypes = new HashMap<>();
 
   private TypeMapper() {
     nativeMapper.put("void", "void");
@@ -71,6 +72,9 @@ public final class TypeMapper {
     for (final Entry<Object, Object> prop : props.entrySet()) {
       if (((String) prop.getKey()).charAt(0) == '-') {
         ignores.add(((String) prop.getKey()).substring(1));
+      } else if (((String) prop.getKey()).charAt(0) == '&') {
+        replaceTypes.put(((String) prop.getKey()).substring(1),
+            (String) prop.getValue());
       } else {
         mapper.put((String) prop.getKey(), (String) prop.getValue());
       }
@@ -103,5 +107,10 @@ public final class TypeMapper {
   private String mapNativeType(final String typeToMap) {
     return nativeMapper.containsKey(typeToMap)
         ? nativeMapper.get(typeToMap) : typeToMap;
+  }
+
+  public String replaceType(final String fullClassName, final String methodName,
+      final String name) {
+    return replaceTypes.get(fullClassName + '$' + methodName + '$' + name);
   }
 }
