@@ -16,9 +16,11 @@
 package gruifo.output.jsni;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 public final class TypeMapper {
   private static final String GWT_JSNI_PACKAGE = "com.google.gwt.core.client.";
@@ -30,6 +32,7 @@ public final class TypeMapper {
   private final Map<String, String> mapper = new HashMap<>();
   private final Map<String, String> nativeMapper = new HashMap<>();
   private final Map<String, String> genericMapper = new HashMap<>();
+  private final Set<String> ignores = new HashSet<>();
 
   private TypeMapper() {
     nativeMapper.put("void", "void");
@@ -66,8 +69,16 @@ public final class TypeMapper {
 
   public void addMappings(final Properties props) {
     for (final Entry<Object, Object> prop : props.entrySet()) {
-      mapper.put((String) prop.getKey(), (String) prop.getValue());
+      if (((String) prop.getKey()).charAt(0) == '-') {
+        ignores.add(((String) prop.getKey()).substring(1));
+      } else {
+        mapper.put((String) prop.getKey(), (String) prop.getValue());
+      }
     }
+  }
+
+  public boolean ignore(final String clazz, final String method) {
+    return ignores.contains(clazz + "$" + method);
   }
 
   public String mapType(final String typeToMap, final boolean generic) {

@@ -76,7 +76,7 @@ class Transformer {
 
   private void transformMethods(final JsFile jsFile, final JClass jFile) {
     for(final JsMethod jsMethod: jsFile.getMethods()) {
-      if (!ignoreMethod(jsMethod)) {
+      if (!ignoreMethod(jFile.getFullClassName(), jsMethod)) {
         for (final List<JParam> params : methodParams(
             jsMethod.getElement().getParams())) {
           final JMethod method = transformMethod(jsMethod, params);
@@ -120,10 +120,11 @@ class Transformer {
     }
   }
 
-  private boolean ignoreMethod(final JsMethod jsMethod) {
+  private boolean ignoreMethod(final String clazz, final JsMethod jsMethod) {
     return ignoreMethods.contains(jsMethod.getMethodName())
         || jsMethod.getElement().isOverride()
         || jsMethod.getElement().isPrivate()
+        || TypeMapper.INSTANCE.ignore(clazz, jsMethod.getMethodName())
         || "clone".equals(jsMethod.getMethodName()); // FIXME clone
   }
 

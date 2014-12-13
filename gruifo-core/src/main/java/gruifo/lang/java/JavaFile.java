@@ -96,6 +96,10 @@ public class JavaFile {
     return fields;
   }
 
+  public String getFullClassName() {
+    return packageName + "." + classOrInteraceName;
+  }
+
   public String getHeaderComment() {
     return headerComment;
   }
