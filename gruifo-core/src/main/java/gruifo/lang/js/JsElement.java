@@ -82,7 +82,7 @@ public class JsElement {
   private String jsDoc;
   private JsType _extends;
   private final List<JsParam> params = new ArrayList<>();
-  private List<JsParam> typeDef = new ArrayList<>();
+  private List<JsParam> typeDef;
   private JsType type;
   private JsType _return;
   private boolean override;
@@ -172,6 +172,10 @@ public class JsElement {
 
   public boolean isProtected() {
     return accessType == AccessType.PROTECTED;
+  }
+
+  public boolean isTypeDef() {
+    return typeDef != null;
   }
 
   public void setClassDesc() {

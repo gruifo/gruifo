@@ -56,9 +56,10 @@ class Transformer {
     for (final JsFile subFile: jsFile.getInnerJFiles()) {
       jFile.addInnerJFile(transform(subFile));
     }
-    if (!jsFile.getElement().getTypeDef().isEmpty()) {
+    if (jsFile.getElement().isTypeDef()) {
       transformFields(jFile, jsFile.getElement().getTypeDef());
       jFile.setDataClass(true);
+      jFile.setExtends(null); // FIXME: setExtends(null) needed?
     }
     setExtends(jFile, jsFile);
     transformEnumFields(jFile, jsFile.getElement().getEnumType(),

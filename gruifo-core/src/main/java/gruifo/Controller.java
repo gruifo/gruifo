@@ -118,14 +118,22 @@ public class Controller {
     return groupFiles(prepareFields(files));
   }
 
+  /**
+   * Remove any fields specified in @typedef if the field is also specified as
+   * prototype field in the JavaScript file.
+   * @param files JavaScript parsed files
+   * @return same list of JavaScript parsed files
+   */
   private Collection<JsFile> prepareFields(final Collection<JsFile> files) {
     for (final JsFile jsFile : files) {
-      final List<JsParam> typeDef = jsFile.getElement().getTypeDef();
-      for (final JsParam field : jsFile.getFields()) {
-        for (int i = 0; i < typeDef.size(); i++) {
-          if (field.getName().equals(typeDef.get(i).getName())) {
-            typeDef.remove(i);
-            break;
+      if (jsFile.getElement().isTypeDef()) {
+        final List<JsParam> typeDefs = jsFile.getElement().getTypeDef();
+        for (final JsParam field : jsFile.getFields()) {
+          for (int i = 0; i < typeDefs.size(); i++) {
+            if (field.getName().equals(typeDefs.get(i).getName())) {
+              typeDefs.remove(i);
+              break;
+            }
           }
         }
       }
@@ -144,10 +152,6 @@ public class Controller {
       if (split.length > 0 && filesMap.containsKey(split[split.length - 1])) {
         final JsFile jsFile2 = filesMap.get(split[split.length - 1]);
         jsFile2.addInnerJsFile(jsFile);
-        //      } else
-        //      if (split.length > 1 && filesMap.containsKey(split[split.length - 1])
-        //          && "prototype".equals(split[split.length - 1])) {
-        //        filesMap.get(split[split.length - 2]).addSubJsFile(jsFile);
       } else {
         groupedFiles.add(jsFile);
       }
