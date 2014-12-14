@@ -70,6 +70,10 @@ class Transformer {
 
   private void transformEnumFields(final JClass jFile, final JsType enumType,
       final List<JsEnum> list) {
+    if (!list.isEmpty()) {
+      jFile.setDataClass(true);
+      jFile.setExtends(null); //FIXME why doesn't set dataclass alone not work?
+    }
     for (final JsEnum enumValue: list) {
       jFile.addEnumValue(enumValue.getFieldName(), transformType(enumType),
           enumValue.getJsDoc());
@@ -104,7 +108,9 @@ class Transformer {
       jFile.setClassGeneric(
           TYPE_MAPPER.mapType(jsFile.getElement().getGenericType()));
     }
-    if (!jFile.isDataClass()) {
+    if (jFile.isDataClass()) {
+      jFile.setExtends(null);
+    } else {
       jFile.setExtends(extendsType == null
           ? TypeMapper.GWT_JAVA_SCRIPT_OBJECT
               : transformType(extendsType));
