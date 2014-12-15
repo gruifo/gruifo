@@ -84,8 +84,13 @@ class Transformer {
   private void transformMethods(final JsFile jsFile, final JClass jFile) {
     for(final JsMethod jsMethod: jsFile.getMethods()) {
       if (!ignoreMethod(jFile.getFullClassName(), jsMethod)) {
-        for (final List<JParam> params : methodParams(
-            jsMethod.getElement().getParams())) {
+        final List<List<JsParam>> list =
+            splitMethodParamsOptional(jsMethod.getElement().getParams());
+        final List<List<JParam>> jParamList = new ArrayList<>();
+        for (final List<JsParam> innerList : list) {
+          jParamList.addAll(split2MethodParamsMulti(innerList));
+        }
+        for (final List<JParam> params : jParamList) {
           final JMethod method = transformMethod(jFile, jsMethod, params);
           if (jsMethod.getElement().isClassDescription()) {
             jFile.setClassDescription(jsMethod.getElement().getJsDoc());
@@ -139,19 +144,72 @@ class Transformer {
         || "clone".equals(jsMethod.getMethodName()); // FIXME clone
   }
 
-  private List<List<JParam>> methodParams(final List<JsParam> jsParams) {
-    final List<List<JParam>> params = new ArrayList<>();
-    List<JParam> current = new ArrayList<JParam>();
+  /**
+   * Creates multiple parameter lists if a parameter is optional. If a
+   * parameter is optional a parameter list if added without this parameter.
+   * @param jsParams List of parameters
+   * @return List of List of parameters
+   */
+  private List<List<JsParam>> splitMethodParamsOptional(final List<JsParam> jsParams) {
+    final List<List<JsParam>> params = new ArrayList<>();
+    List<JsParam> current = new ArrayList<JsParam>();
     params.add(current);
     for (int i = 0; i < jsParams.size(); i++) {
       final JsParam jsParam = jsParams.get(i);
       if (jsParam.getType().isOptional()) {
-        current = new ArrayList<JParam>(params.get(params.size() - 1));
+        current = new ArrayList<JsParam>(params.get(params.size() - 1));
         params.add(current);
       }
-      final JParam param =
-          new JParam(jsParam.getName(), transformType(jsParam.getType()));
-      current.add(param);
+      current.add(jsParam);
+    }
+    return params;
+  }
+
+  /**
+   * Creates multiple parameters lists if a parameter type contains multiple types.
+   * @param jsParams
+   * @return
+   */
+  private List<List<JParam>> split2MethodParamsMulti(final List<JsParam> jsParams) {
+    final List<List<JParam>> params = new ArrayList<>();
+    params.add(new ArrayList<JParam>());
+    //FIXME This can results in methods with same arguments, because tranformType returns the
+    //    same type. Should check if already added...
+    for (int i = 0; i < jsParams.size(); i++) {
+      final JsParam jsParam = jsParams.get(i);
+      if (jsParam.getType().getTypes().size() > 1) {
+        final List<JParam> splitParams = new ArrayList<>();
+        for (final JsTypeSpec innerJsParam : jsParam.getType().getTypes()) {
+          final String transformedType = transformType(innerJsParam, true);
+          boolean duplicate = false;
+          for (final JParam jParam : splitParams) {
+            if (transformedType.equals(jParam.getType())) {
+              duplicate = true;
+            }
+          }
+          if (!duplicate) {
+            splitParams.add(new JParam(jsParam.getName(), transformedType));
+          }
+        }
+        final int currentSize = params.size();
+        for (int k = 1; k < splitParams.size(); k++) {
+          for (int j = 0; j < currentSize; j++) {
+            params.add(new ArrayList<>(params.get(j)));
+          }
+        }
+        for (int j = 0; j < params.size();) {
+          for (final JParam jParam : splitParams) {
+            params.get(j).add(jParam);
+            j++;
+          }
+        }
+      } else {
+        final JParam jParam =
+            new JParam(jsParam.getName(), transformType(jsParam.getType()));
+        for (final List<JParam> list : params) {
+          list.add(jParam);
+        }
+      }
     }
     return params;
   }
@@ -200,20 +258,21 @@ class Transformer {
       return TYPE_MAPPER.mapType(jsType.getRawType());
     }
     type = tranformSpecific(jsType);
-    if (type != null) {
-      return type;
-    } else {
+    if (type == null) {
       type = "";
+    } else {
+      return type;
     }
     if (jsType.getTypes().isEmpty()) {
       LOG.error("Type empty: {}", jsType);
     } else if (jsType.getTypes().size() > 1) {
-      final JsTypeSpec other = containsUndefined(jsType.getTypes());
-      if (jsType.getTypes().size() == 2 && other != null) {
-        type = TYPE_MAPPER.mapType(other.getName());
-      } else {
-        type = TypeMapper.GWT_JAVA_SCRIPT_OBJECT;
-      }
+      // FIXME containsUndefined
+      //      final JsTypeSpec other = containsUndefined(jsType.getTypes());
+      //      if (jsType.getTypes().size() == 2 && other != null) {
+      //        type = TYPE_MAPPER.mapType(other.getName());
+      //      } else {
+      type = TypeMapper.GWT_JAVA_SCRIPT_OBJECT;
+      //    }
     } else {
       type = transformType(jsType.getTypes().get(0), false);
       if (jsType.isVarArgs()) {
@@ -248,9 +307,10 @@ class Transformer {
       ts = TypeMapper.GWT_JAVA_SCRIPT_OBJECT;
     } else if (jsType.getTypes().size() == 1) {
       ts = tranformSpecific(jsType.getTypes().get(0));
-    } else if (jsType.getTypes().size() == 2) {
-      final JsTypeSpec other = containsUndefined(jsType.getTypes());
-      ts = other == null ? null : tranformSpecific(other);
+      // FIXME containsUndefined
+      //    } else if (jsType.getTypes().size() == 2) {
+      //      final JsTypeSpec other = containsUndefined(jsType.getTypes());
+      //      ts = other == null ? null : tranformSpecific(other);
     } else {
       ts = null;
     }
@@ -268,18 +328,5 @@ class Transformer {
       }
     }
     return specific == null ? null : TYPE_MAPPER.mapType(specific);
-  }
-
-  private JsTypeSpec containsUndefined(final List<JsTypeSpec> list) {
-    boolean undefined = false;
-    JsTypeSpec other = null;
-    for (final JsTypeSpec jsTypeSpec : list) {
-      if ("undefined".equals(jsTypeSpec.getName())) {
-        undefined = true;
-      } else {
-        other = jsTypeSpec;
-      }
-    }
-    return undefined ? other : null;
   }
 }

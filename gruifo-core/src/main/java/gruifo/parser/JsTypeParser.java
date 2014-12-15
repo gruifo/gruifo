@@ -37,7 +37,9 @@ public class JsTypeParser {
         parseVarArgs(jsType, parseNull(jsType, parseOptional(jsType, rawType)));
     final String[] pTypes = pType.split("\\|");
     for (final String sType : pTypes) {
-      if (!parseAsFunction(jsType, sType))
+      if ("undefined".equals(sType)) {
+        jsType.setNull();
+      } else if (!parseAsFunction(jsType, sType))
         jsType.addType(parseAsGenericType(sType));
     }
     return jsType;
@@ -57,6 +59,12 @@ public class JsTypeParser {
     return rType;
   }
 
+  /**
+   * Parse optional types. These type end with '='.
+   * @param jsType
+   * @param type
+   * @return
+   */
   String parseOptional(final JsType jsType, final String type) {
     final String rType;
     if (type.endsWith("=")) {
