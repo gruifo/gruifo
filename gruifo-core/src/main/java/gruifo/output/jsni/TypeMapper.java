@@ -57,10 +57,12 @@ public final class TypeMapper {
     mapper.put("Object", GWT_JAVA_SCRIPT_OBJECT);
     mapper.put("undefined", GWT_JAVA_SCRIPT_OBJECT);
     // JSNI specific
+    mapper.put("HTMLDocument", "com.google.gwt.dom.client.Node");
     mapper.put("Document", "com.google.gwt.dom.client.Document");
     mapper.put("Node", "com.google.gwt.dom.client.Node");
     mapper.put("Element", "com.google.gwt.dom.client.Element");
     mapper.put("Event", "com.google.gwt.dom.client.NativeEvent");
+    mapper.put("Touch", "com.google.gwt.dom.client.Touch");
 
     mapper.put("Array", "com.google.gwt.core.client.JsArray");
     mapper.put("Array.<*>", "com.google.gwt.core.client.JsArray");
