@@ -92,6 +92,12 @@ public final class TypeMapper {
         ? mapGenericType(typeToMap) : mapNativeType(typeToMap));
   }
 
+  /**
+   * Returns the type matching the typeToMap or the value passed if it doesn't
+   * map any types.
+   * @param typeToMap
+   * @return
+   */
   public String mapType(final String typeToMap) {
     return mapOtherType(mapNativeType(typeToMap));
   }

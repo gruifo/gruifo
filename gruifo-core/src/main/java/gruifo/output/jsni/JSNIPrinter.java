@@ -29,7 +29,6 @@ import java.util.Set;
 
 public class JSNIPrinter implements FilePrinter {
 
-  private final TypeMapper typeMapper = TypeMapper.INSTANCE;
   private final Transformer transformer = new Transformer();
   private final JSNIMethodPrinter mPrinter = new JSNIMethodPrinter();
   private final JSNIFieldPrinter fPrinter = new JSNIFieldPrinter();

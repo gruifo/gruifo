@@ -26,6 +26,9 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Parses the type of a @typedef annotation.
+ */
 class JsDocTypedefParser {
   private static final Logger LOG = LoggerFactory
       .getLogger(JsDocTypedefParser.class);
@@ -111,7 +114,7 @@ class JsDocTypedefParser {
 
   /**
    * Replace comment token '*' at beginning of line and remove all spaces.
-   * 
+   *
    * @param string
    * @return
    */

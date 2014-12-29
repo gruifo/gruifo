@@ -214,6 +214,7 @@ public class JavaScriptFileParser implements NodeVisitor {
     }
   }
 
+  //FIXME fix Const parseing
   private void addConst(final String constName, final JsElement element) {
     final String packageName =
         constName.substring(0, constName.lastIndexOf('.'));
@@ -251,7 +252,7 @@ public class JavaScriptFileParser implements NodeVisitor {
   JsMethod parsePrototypeMethod(final String name) {
     final Matcher nameMatcher = PROTOTYPE_PATTERN.matcher(name);
     if (nameMatcher.find()) {
-      final String packageName = nameMatcher.group(1);// + "." + nameMatcher.group(2);
+      final String packageName = nameMatcher.group(1);
       final String methodName = nameMatcher.group(4);
       return new JsMethod(packageName, methodName);
     } else {
