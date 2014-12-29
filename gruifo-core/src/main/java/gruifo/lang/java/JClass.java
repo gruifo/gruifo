@@ -16,9 +16,42 @@
 package gruifo.lang.java;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class JClass extends JavaFile {
+public class JClass {
+
+  public static class EnumValue {
+    private final String javaDoc;
+    private final String name;
+    private final String type;
+
+    public EnumValue(final String name, final String type, final String javaDoc) {
+      this.name = name;
+      this.type = type;
+      this.javaDoc = javaDoc;
+    }
+    public String getJavaDoc() {
+      return javaDoc;
+    }
+    public String getName() {
+      return name;
+    }
+    public String getType() {
+      return type;
+    }
+  }
+  private final String packageName;
+  private final String classOrInteraceName;
+  private final Set<String> imports = new HashSet<>();
+  private final List<JParam> fields = new ArrayList<>();;
+  private final List<JMethod> methods = new ArrayList<>();
+  private final List<EnumValue> enumValues = new ArrayList<>();
+  private String headerComment = "";
+  private final List<JClass> innerJFil = new ArrayList<>();
+  private boolean _static;
+  private String classDescription;
 
   private final List<JMethod> constructors = new ArrayList<>();
   private String _extends;
@@ -26,11 +59,93 @@ public class JClass extends JavaFile {
   private boolean dataClass;
 
   public JClass(final String packageName, final String className) {
-    super(packageName, className);
+    this.packageName = packageName;
+    this.classOrInteraceName = className;
   }
 
   public void addConstructor(final JMethod constructor) {
     constructors.add(constructor);
+  }
+
+  public void addEnumValue(final String name, final String value,
+      final String jsDoc) {
+    enumValues.add(new EnumValue(name, value, jsDoc));
+  }
+
+  public JParam addField(final String name, final String type) {
+    final JParam jParam = new JParam(name, type);
+    fields.add(jParam);
+    return jParam;
+  }
+
+  public void addInnerJFile(final JClass JClass) {
+    _static = true;
+    innerJFil.add(JClass);
+  }
+
+  public void addMethod(final JMethod method) {
+    methods.add(method);
+  }
+
+
+  public void setExtends(final String _extends) {
+    this._extends = _extends;
+  }
+
+  public String getClassOrInterfaceName() {
+    return classOrInteraceName;
+  }
+
+  public String getClassDescription() {
+    return classDescription;
+  }
+
+  public List<EnumValue> getEnumValues() {
+    return enumValues;
+  }
+
+  public List<JParam> getFields() {
+    return fields;
+  }
+
+  public String getFullClassName() {
+    return packageName + "." + classOrInteraceName;
+  }
+
+  public String getHeaderComment() {
+    return headerComment;
+  }
+
+  public Set<String> getImports() {
+    return imports;
+  }
+
+  public List<JClass> getInnerJFiles() {
+    return innerJFil;
+  }
+
+  public List<JMethod> getMethods() {
+    return methods;
+  }
+
+  public String getPackageName() {
+    return packageName;
+  }
+
+  public boolean isStatic() {
+    return _static;
+  }
+
+  public void setClassDescription(final String classDescription) {
+    this.classDescription = classDescription;
+  }
+
+  public void setHeaderComment(final String headerComment) {
+    this.headerComment = headerComment;
+  }
+
+  public void setStatic(final boolean _static) {
+    this._static = _static;
   }
 
   public String getClassGeneric() {
@@ -57,9 +172,4 @@ public class JClass extends JavaFile {
   public void setDataClass(final boolean dataClass) {
     this.dataClass = dataClass;
   }
-
-  public void setExtends(final String _extends) {
-    this._extends = _extends;
-  }
-
 }

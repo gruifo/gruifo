@@ -18,7 +18,6 @@ package gruifo.output.jsni;
 import gruifo.lang.java.JClass;
 import gruifo.lang.java.JMethod;
 import gruifo.lang.java.JParam;
-import gruifo.lang.java.JavaFile;
 import gruifo.lang.js.JsElement.JsParam;
 import gruifo.lang.js.JsEnum;
 import gruifo.lang.js.JsFile;
@@ -48,7 +47,7 @@ class Transformer {
     ignoreMethods.add("toString");
   }
 
-  public JavaFile transform(final JsFile jsFile) {
+  public JClass transform(final JsFile jsFile) {
     final JClass jFile =
         new JClass(jsFile.getPackageName(), jsFile.getClassOrInterfaceName());
     addImports(jFile);
@@ -105,7 +104,7 @@ class Transformer {
     }
   }
 
-  private void addImports(final JavaFile javaFile) {
+  private void addImports(final JClass JClass) {
   }
 
   private void setExtends(final JClass jFile, final JsFile jsFile) {
@@ -245,11 +244,9 @@ class Transformer {
 
   private void setReturnType(final JsMethod jsMethod, final JMethod jMethod) {
     jMethod.setGenericType(jsMethod.getElement().getGenericType());
-    if (jsMethod.getElement().getReturn() == null) {
-      jMethod.setReturn("void");
-    } else {
-      jMethod.setReturn(transformType(jsMethod.getElement().getReturn()));
-    }
+    final boolean voidReturn = jsMethod.getElement().getReturn() == null;
+    jMethod.setReturn(voidReturn
+        ? "void" : transformType(jsMethod.getElement().getReturn()));
   }
 
   private String transformType(final JsType jsType) {
@@ -266,6 +263,7 @@ class Transformer {
     if (jsType.getTypes().isEmpty()) {
       LOG.error("Type empty: {}", jsType);
     } else if (jsType.getTypes().size() > 1) {
+      LOG.debug("More then 1 type: {}", jsType);
       // FIXME containsUndefined
       //      final JsTypeSpec other = containsUndefined(jsType.getTypes());
       //      if (jsType.getTypes().size() == 2 && other != null) {
@@ -273,7 +271,7 @@ class Transformer {
       //      } else {
       type = TypeMapper.GWT_JAVA_SCRIPT_OBJECT;
       //    }
-    } else {
+    } else { // size == 1
       type = transformType(jsType.getTypes().get(0), false);
       if (jsType.isVarArgs()) {
         type = type + "...";

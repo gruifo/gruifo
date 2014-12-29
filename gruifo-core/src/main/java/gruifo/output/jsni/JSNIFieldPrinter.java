@@ -15,8 +15,8 @@
  */
 package gruifo.output.jsni;
 
+import gruifo.lang.java.JClass;
 import gruifo.lang.java.JParam;
-import gruifo.lang.java.JavaFile;
 import gruifo.output.PrintUtil;
 
 /**
@@ -25,7 +25,7 @@ import gruifo.output.PrintUtil;
 public class JSNIFieldPrinter {
 
   public void printFields(final StringBuffer buffer, final int indent,
-      final JavaFile jFile) {
+      final JClass jFile) {
     for (final JParam field : jFile.getFields()) {
       printGetter(buffer, indent, field);
       printSetter(buffer, indent, field);

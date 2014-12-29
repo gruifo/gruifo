@@ -16,9 +16,9 @@
 package gruifo.output.jsni;
 
 import gruifo.lang.AccessType;
+import gruifo.lang.java.JClass;
 import gruifo.lang.java.JMethod;
 import gruifo.lang.java.JParam;
-import gruifo.lang.java.JavaFile;
 import gruifo.output.PrintUtil;
 
 /**
@@ -27,8 +27,9 @@ import gruifo.output.PrintUtil;
 class JSNIMethodPrinter {
 
   public void printMethods(final StringBuffer buffer, final int indent,
-      final JavaFile jFile) {
+      final JClass jFile) {
     for (final JMethod method : jFile.getMethods()) {
+      //TODO print method with multi arguments a|b
       PrintUtil.indent(buffer, method.getJsDoc(), indent);
       PrintUtil.indent(buffer, indent);
       buffer.append(appendAccessType(method.getAccessType()));

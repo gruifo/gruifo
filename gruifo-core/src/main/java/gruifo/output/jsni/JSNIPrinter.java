@@ -16,9 +16,8 @@
 package gruifo.output.jsni;
 
 import gruifo.lang.java.JClass;
+import gruifo.lang.java.JClass.EnumValue;
 import gruifo.lang.java.JMethod;
-import gruifo.lang.java.JavaFile;
-import gruifo.lang.java.JavaFile.EnumValue;
 import gruifo.lang.js.JsFile;
 import gruifo.output.FilePrinter;
 import gruifo.output.PrintUtil;
@@ -40,31 +39,31 @@ public class JSNIPrinter implements FilePrinter {
     return printFile(transformer.transform(jsFile));
   }
 
-  public String printFile(final JavaFile jFile) {
+  public String printFile(final JClass jFile) {
     final int indent = 0;
     final StringBuffer buffer = new StringBuffer();
     buffer.append(jFile.getHeaderComment());
     printPackageName(buffer, jFile.getPackageName());
     printImports(buffer, jFile.getImports());
     jFile.setStatic(false); //FIXME setting static should not be done here
-    printJavaFile(jFile, indent, buffer);
+    printJClass(jFile, indent, buffer);
     return buffer.toString();
   }
 
-  private void printJavaFile(final JavaFile jFile, int indent,
+  private void printJClass(final JClass jFile, int indent,
       final StringBuffer buffer) {
-    printClass(buffer, (JClass) jFile, indent);
+    printClass(buffer, jFile, indent);
     indent++;
     printEnumFields(buffer, indent, jFile.getPackageName(),
         jFile.getClassOrInterfaceName(), jFile.getEnumValues());
     if (jFile.getEnumValues().isEmpty()) {
-      printConstructors(indent, buffer, (JClass) jFile);
+      printConstructors(indent, buffer, jFile);
     }
     fPrinter.printFields(buffer, indent, jFile);
     mPrinter.printMethods(buffer, indent, jFile);
-    for (final JavaFile innerFile: jFile.getInnerJFiles()) {
+    for (final JClass innerFile: jFile.getInnerJFiles()) {
       innerFile.setStatic(true); //FIXME setting static should not be done here
-      printJavaFile(innerFile, indent, buffer);
+      printJClass(innerFile, indent, buffer);
     }
     buffer.append('}'); // close file
     PrintUtil.nl(buffer);

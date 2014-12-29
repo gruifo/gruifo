@@ -15,7 +15,7 @@
  */
 package gruifo.output.jsinterface;
 
-import gruifo.lang.java.JavaFile;
+import gruifo.lang.java.JClass;
 import gruifo.lang.js.JsFile;
 import gruifo.output.FilePrinter;
 
@@ -28,11 +28,11 @@ public class JsInterfacePrinter implements FilePrinter {
   private static final String GWT_JS_PACKAGE = "com.google.gwt.core.client.js";
 
   @Override
-  public String printFile(final JsFile javaFile) {
+  public String printFile(final JsFile JClass) {
     return "TODO";
   }
 
-  private String printFile(final JavaFile jFile) {
+  private String printFile(final JClass jFile) {
     final StringBuffer buffer = new StringBuffer();
     buffer.append(jFile.getHeaderComment());
     writePackageName(buffer, jFile.getPackageName());
@@ -70,7 +70,7 @@ public class JsInterfacePrinter implements FilePrinter {
     importList.add(GWT_JS_PACKAGE + "JsProperty");
   }
 
-  private void writeInterface(final StringBuffer buffer, final JavaFile jFile) {
+  private void writeInterface(final StringBuffer buffer, final JClass jFile) {
     /*    if (jFile.isClass()) {
       buffer.append("@JsInterface\n"); //(prototype="Window")
     }
@@ -83,7 +83,7 @@ public class JsInterfacePrinter implements FilePrinter {
     buffer.append(" {\n");
      */  }
 
-  private void writeMethods(final StringBuffer buffer, final JavaFile jFile) {
+  private void writeMethods(final StringBuffer buffer, final JClass jFile) {
     /*    for (final JMethod method : jFile.getMethods()) {
       buffer.append(method.getElement().getComment());
       buffer.append("\n  ");
