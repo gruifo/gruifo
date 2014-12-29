@@ -16,15 +16,16 @@
 package gruifo.parser;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import gruifo.lang.js.JsElement;
+import gruifo.lang.js.JsType.JsTypeSpec;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +36,7 @@ import org.junit.Test;
 public class JavaScriptDocParserTest {
 
   private static final String COMMENT = "comment";
-  private final JsElement[] docs = new JsElement[4];
+  private final JsElement[] docs = new JsElement[6];
 
   @Before
   public void parseFiles() throws IOException {
@@ -71,8 +72,8 @@ public class JavaScriptDocParserTest {
     assertEquals("params size", 12, docs[0].getParams().size());
     assertEquals("params 0 name",
         "options", docs[0].getParams().get(0).getName());
-    assertEquals("params 0 type",
-        "nl.Options", docs[0].getParams().get(0).getType().getTypes().get(0).getName());
+    assertEquals("params 0 type", "nl.Options",
+        docs[0].getParams().get(0).getType().getTypes().get(0).getName());
     assertTrue("params 1",
         docs[0].getParams().get(1).getType().isFunction());
   }
@@ -81,17 +82,52 @@ public class JavaScriptDocParserTest {
   public void testReturn() {
     assertEquals("return type 1", "nl.Object",
         docs[0].getReturn().getTypes().get(0).getName());
-    assertEquals("return type 2", "undefined",
-        docs[0].getReturn().getTypes().get(1).getName());
   }
 
   @Test
   public void testTypeDef() {
-    assertEquals("Size of typedef fields", 5, ((List) docs[1].getTypeDef()).size());
+    assertEquals("Size of typedef fields", 5, docs[1].getTypeDef().size());
   }
 
   @Test
   public void testSingleLineTypeDef() {
-    assertEquals("Size of typedef fields", 3, ((List) docs[3].getTypeDef()).size());
+    assertEquals("Size of typedef fields", 3, docs[3].getTypeDef().size());
+  }
+
+  @Test
+  public void testMultiTypeTypedefField() {
+    assertEquals("Typedef field has 2 types: "
+        + docs[5].getTypeDef().get(0).getType().getTypes(), 2,
+        docs[5].getTypeDef().get(0).getType().getTypes().size());
+    for (final JsTypeSpec jse :
+      docs[5].getTypeDef().get(0).getType().getTypes()) {
+      assertFalse("Types should not contain '(':" + jse,
+          jse.getRawType().contains("("));
+      assertFalse("Types should not contain ')':" + jse,
+          jse.getRawType().contains(")"));
+    }
+  }
+
+  @Test
+  public void testCorrectlyParseGeneric() {
+    assertEquals("Typedef field has 2 types: "
+        + docs[5].getTypeDef().get(1).getType().getTypes(), 2,
+        docs[5].getTypeDef().get(1).getType().getTypes().size());
+    assertEquals("", "Object.<string,string>",
+        docs[5].getTypeDef().get(1).getType().getTypes().get(0).getRawType());
+    assertEquals("", "Object.<string,number>",
+        docs[5].getTypeDef().get(1).getType().getTypes().get(1).getRawType());
+  }
+
+  @Test
+  public void testCorrectlyParseNotNull() {
+    assertEquals("Typedef field has 2 types: "
+        + docs[5].getTypeDef().get(2).getType().getTypes(), 2,
+        docs[5].getTypeDef().get(2).getType().getTypes().size());
+    for (final JsTypeSpec jse :
+      docs[5].getTypeDef().get(2).getType().getTypes()) {
+      assertFalse("Types should not contain '!':" + jse,
+          jse.getRawType().contains("!"));
+    }
   }
 }

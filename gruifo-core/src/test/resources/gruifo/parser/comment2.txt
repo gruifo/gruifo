@@ -10,21 +10,3 @@ com.alphabet.OMEGA.Rho = {
   EPSILON: 5,
   ZET: 6
 };
-
-
-  public enum TokenType {
-    ALPHA;
-
-    public double getValue() {
-      return getValueImpl(name());
-    }
-
-    private native double getValueImpl(String key) /*-{
-    return $win.com.alphabet.OMEGA.Rho[key];
-  }-*/;
-
-  use:
-  
-  function(param name) /*-{
-    $win.hallo.y(name.getValue());
-  }-*/;

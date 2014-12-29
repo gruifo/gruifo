@@ -33,16 +33,29 @@ public class JsTypeParser {
 
   public JsType parseType(final String rawType) {
     final JsType jsType = new JsType(rawType);
-    final String pType =
-        parseVarArgs(jsType, parseNull(jsType, parseOptional(jsType, rawType)));
+    final String pType = stripParentheses(
+        parseVarArgs(jsType, parseNull(jsType, parseOptional(jsType, rawType))));
     final String[] pTypes = pType.split("\\|");
     for (final String sType : pTypes) {
-      if ("undefined".equals(sType)) {
+      if ("undefined".equals(sType) || "null".equals(sType)) {
         jsType.setNull();
       } else if (!parseAsFunction(jsType, sType))
         jsType.addType(parseAsGenericType(sType));
     }
     return jsType;
+  }
+
+  private String stripParentheses(final String type) {
+    String strippedType;
+    if (type.isEmpty()) {
+      strippedType = type;
+    } else {
+      final int beginIndex = type.charAt(0) == '(' ? 1 : 0;
+      final int length = type.length();
+      final int endIndex = length - (type.charAt(length - 1) == ')' ? 1 : 0);
+      strippedType = type.substring(beginIndex, endIndex);
+    }
+    return strippedType;
   }
 
   String parseNull(final JsType jsType, final String type) {
@@ -76,6 +89,12 @@ public class JsTypeParser {
     return rType;
   }
 
+  /**
+   * Parse var-args type; i.e. starts with 3 dots.
+   * @param jsType structured type
+   * @param type raw type to check
+   * @return raw type with 3 dots removed if present
+   */
   String parseVarArgs(final JsType jsType, final String type) {
     final String rType;
     if (type.startsWith("...")) {
@@ -108,13 +127,13 @@ public class JsTypeParser {
     final Matcher matcher2 = GENERIC_TYPE_PATTERN.matcher(type);
     final JsTypeSpec ts;
     if (matcher2.find()) {
-      ts = new JsTypeSpec(matcher2.group(1));
+      ts = new JsTypeSpec(matcher2.group(1), type);
       final List<String> generics = parseGenericArgs(matcher2.group(2));
       for (final String arg: generics) {
         ts.addGeneric(parseAsGenericType(arg));
       }
     } else {
-      ts = new JsTypeSpec(type);
+      ts = new JsTypeSpec(type, type);
     }
     return ts;
   }

@@ -22,18 +22,16 @@ public class JsType {
 
   public static class JsTypeSpec {
     private final String name;
+    private final String rawType;
     private final List<JsTypeSpec> generics = new ArrayList<>();
 
-    public JsTypeSpec(final String name) {
+    public JsTypeSpec(final String name, final String rawType) {
       this.name = name;
+      this.rawType = rawType;
     }
 
     public void addGeneric(final JsTypeSpec generic) {
       generics.add(generic);
-    }
-
-    public boolean isGeneric() {
-      return !generics.isEmpty();
     }
 
     public List<JsTypeSpec> getGenerics() {
@@ -42,6 +40,20 @@ public class JsType {
 
     public String getName() {
       return name;
+    }
+
+    public String getRawType() {
+      return rawType;
+    }
+
+    public boolean isGeneric() {
+      return !generics.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+      return "JsTypeSpec [name=" + name + ", rawType=" + rawType
+          + ", generics=" + generics + "]";
     }
   }
 

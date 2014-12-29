@@ -1,0 +1,7 @@
+/**
+ * Multi type typedef field. 
+ * @typedef {{myField1: (nl.MyObject|string|undefined)
+          , myField2: (Object.<string, string|number>)
+          , myField3: (!Array.<ol.layer.Layer>|!ol.Collection|undefined)
+          }}
+*/
