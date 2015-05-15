@@ -84,7 +84,8 @@ class JsDocTypedefParser {
     int offset = 0;
     int functionDepth = 0;
     for (int i = 0; i < values.length(); i++) {
-      if (values.charAt(i) == ':' && functionDepth == 0) {
+      if (values.charAt(i) == ':' && functionDepth == 0 &&
+          values.charAt(i - 1) != ')') { // check if not return type of method
         var = values.substring(offset, i);
         offset = i + 1;
         varFound = true;
