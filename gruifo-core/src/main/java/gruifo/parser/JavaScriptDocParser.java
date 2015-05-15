@@ -140,6 +140,10 @@ public class JavaScriptDocParser {
    * Annotation: @template
    */
   private static final String TEMPLATE = "template";
+  /**
+   * Annotation: @this
+   */
+  private static final String THIS = "this";
   private static final String TODO = "todo";
   private static final String TYPE = "type";
   private static final String TYPEDEF = "typedef";
@@ -233,6 +237,7 @@ public class JavaScriptDocParser {
       case SEE:
       case STRUCT:
       case SUPPRESS:
+      case THIS:
       case TODO:
         // ignore annotation, contains no information for the generation.
         break;
