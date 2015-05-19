@@ -1,8 +1,0 @@
-/**
- * @typedef {{var1: nl.Collection.<nl.Control>,
- *            var2: nl.Options,
- *            var3: (Array.<nl.Collection>|undefined),
- *            someFunction:
- *                function(new: nl.Param1, nl.Param2),
- *            var3: Object.<string, *>}}
-*/

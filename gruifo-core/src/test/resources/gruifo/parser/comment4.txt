@@ -1,4 +1,0 @@
-/**
- * native JavaScript hash object.
- * @type {Object.<string,*>}
-*/

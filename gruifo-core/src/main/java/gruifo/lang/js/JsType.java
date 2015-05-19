@@ -20,65 +20,61 @@ import java.util.List;
 
 public class JsType {
 
-  public static class JsTypeSpec {
-    private final String name;
-    private final String rawType;
-    private final List<JsTypeSpec> generics = new ArrayList<>();
-
-    public JsTypeSpec(final String name, final String rawType) {
-      this.name = name;
-      this.rawType = rawType;
-    }
-
-    public void addGeneric(final JsTypeSpec generic) {
-      generics.add(generic);
-    }
-
-    public List<JsTypeSpec> getGenerics() {
-      return generics;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public String getRawType() {
-      return rawType;
-    }
-
-    public boolean isGeneric() {
-      return !generics.isEmpty();
-    }
-
-    @Override
-    public String toString() {
-      return "JsTypeSpec [name=" + name + ", rawType=" + rawType
-          + ", generics=" + generics + "]";
-    }
-  }
-
   private boolean _function;
-  private final List<JsTypeSpec> types = new ArrayList<>();
+  private String name;
+  private final List<JsType> choices = new ArrayList<>();
+  private final List<JsType> typeList = new ArrayList<>();
   private boolean optional;
   private boolean notNull;
   private boolean canNull;
   private boolean varArgs;
   private final String rawType;
 
+  public JsType(final String name, final String rawType) {
+    this(rawType);
+    this.name = name;
+  }
+
   public JsType(final String rawType) {
     this.rawType = rawType;
   }
 
-  public void addType(final JsTypeSpec type) {
-    types.add(type);
+  public String getName() {
+    return name;
+  }
+
+  public void addChoice(final JsType type) {
+    choices.add(type);
+  }
+
+  public void addChoices(final List<JsType> choices) {
+    this.choices.addAll(choices);
+  }
+
+  public List<JsType> getChoices() {
+    return choices;
+  }
+
+  public void addSubType(final JsType type) {
+    typeList.add(type);
+  }
+
+  public void addSubTypes(final List<JsType> types) {
+    if (types != null) {
+      typeList.addAll(types);
+    }
+  }
+
+  public boolean isGeneric() {
+    return !typeList.isEmpty();
   }
 
   public String getRawType() {
     return rawType;
   }
 
-  public List<JsTypeSpec> getTypes() {
-    return types;
+  public List<JsType> getTypeList() {
+    return typeList;
   }
 
   public boolean isCanNull() {
@@ -101,36 +97,40 @@ public class JsType {
     return varArgs;
   }
 
-  public void setFunction() {
-    _function = true;
+  public void setFunction(final boolean _function) {
+    this._function = _function;
   }
 
   /**
    * Type is optional.
+   * @param optional
    */
-  public void setOptional() {
-    optional = true;
+  public void setOptional(final boolean optional) {
+    this.optional = optional;
   }
 
   /**
    * Value may not be null.
+   * @param notNull
    */
-  public void setNotNull() {
-    notNull = true;
+  public void setNotNull(final boolean notNull) {
+    this.notNull = notNull;
   }
 
   /**
    * Value may be null.
+   * @param canNull
    */
-  public void setNull() {
-    canNull = true;
+  public void setNull(final boolean canNull) {
+    this.canNull = canNull;
   }
 
   /**
    * Type is a var args type.
+   * @param varArgs
    */
-  public void setVarArgs() {
-    varArgs = true;
+  public void setVarArgs(final boolean varArgs) {
+    this.varArgs = varArgs;
   }
 
   @Override

@@ -20,6 +20,7 @@ public class JParam {
   private String type;
   private String name;
   private boolean optional;
+  private boolean multiField;
   private boolean varargs;
   private String javaDoc;
 
@@ -40,6 +41,10 @@ public class JParam {
     return type;
   }
 
+  public boolean isMultiField() {
+    return multiField;
+  }
+
   public boolean isOptional() {
     return optional;
   }
@@ -50,6 +55,10 @@ public class JParam {
 
   public void setJavaDoc(final String javaDoc) {
     this.javaDoc = javaDoc;
+  }
+
+  public void setMultiField(final boolean multiField) {
+    this.multiField = multiField;
   }
 
   public void setName(final String name) {

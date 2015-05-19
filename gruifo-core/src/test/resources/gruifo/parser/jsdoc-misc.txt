@@ -1,0 +1,17 @@
+/**
+ * This is a comment with misc annotations.
+ * @api
+ * @class
+ * @classdesc
+ * @constructor
+ * @fires nl.Event
+ * @inheritDoc
+ * @observable
+ * @Override
+ * @private
+ * @protected
+ * @return {nl.Object|undefined}
+ * @extends {nl.Object}
+ * @template S,T,U
+ * @typedef {Array.<number>}
+ */

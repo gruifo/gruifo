@@ -121,4 +121,8 @@ public final class TypeMapper {
       final String name) {
     return replaceTypes.get(fullClassName + '$' + methodName + '$' + name);
   }
+
+  public String replaceType(final String fullClassName, final String name) {
+    return replaceTypes.get(fullClassName + '$' + name);
+  }
 }

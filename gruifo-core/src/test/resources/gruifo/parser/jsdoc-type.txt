@@ -1,0 +1,11 @@
+/**
+ * native JavaScript hash object.
+ * @type {Object.<string,*>}
+ * @type {string}
+ * @type {A|B}
+ * @type {Array.<nl.Var>}
+ * @type {!Array.<?number>}
+ * @type {!(Array.<?number>|undefined)} 
+ * @type {Object.<string, *>} 
+ * @type {Array.<ol.RendererType>}
+*/

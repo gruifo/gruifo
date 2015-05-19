@@ -1,0 +1,15 @@
+/**
+ * @typedef {{var1: nl.Collection.<nl.Control>,
+ *            var2: nl.Options,
+ *            var3: (Array.<nl.Collection>|undefined),
+ *            someFunction:
+ *                function(new: nl.Param1, nl.Param2),
+ *            var4: Object.<string, *>,
+ *            handleEvent: function(my.Object):boolean,
+ *            var5: number, var6: number, var7: SomeObject,
+ *            var8: (nl.MyObject|string|undefined)
+ *          , var9: (Object.<string, string|number>)
+ *          , var10: (!Array.<nl.MyO|com.MyOther, string|number>|!nl.Collection|undefined)
+ *          , handleEvent2: function(my2.Object2):boolean
+ *         }}
+ */

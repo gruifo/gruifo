@@ -40,6 +40,9 @@ public class JSNIFieldPrinter {
     buffer.append(field.getType());
     buffer.append(" get");
     buffer.append(PrintUtil.firstCharUpper(field.getName()));
+    if (field.isMultiField()) {
+      buffer.append(fixMultiTypeField(field));
+    }
     buffer.append("() /*-{");
     PrintUtil.nl(buffer);
     PrintUtil.indent(buffer, indent + 1);
@@ -50,6 +53,15 @@ public class JSNIFieldPrinter {
     PrintUtil.indent(buffer, indent);
     buffer.append("}-*/;");
     PrintUtil.nl2(buffer);
+  }
+
+  private String fixMultiTypeField(final JParam field) {
+    final int genericIdx = field.getType().indexOf('<');
+    final String subString = genericIdx < 0 ? field.getType()
+        : field.getType().substring(0, genericIdx);
+    final int dotIdx = subString.lastIndexOf('.');
+    return  PrintUtil.firstCharUpper(
+        dotIdx < 0 ? subString : subString.substring(dotIdx + 1));
   }
 
   private void printSetter(final StringBuffer buffer, final int indent,

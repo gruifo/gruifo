@@ -16,33 +16,20 @@
 package gruifo.parser;
 
 import gruifo.lang.js.JsType;
-import gruifo.lang.js.JsType.JsTypeSpec;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Parse the types of @param, @return and @type elements.
  */
 public class JsTypeParser {
 
-  private static final Pattern GENERIC_TYPE_PATTERN =
-      Pattern.compile("(.+?)\\.<(.+)>");
+  private static final String FUNCTION = "function(";
 
   public JsType parseType(final String rawType) {
-    final JsType jsType = new JsType(rawType);
-    final String pType = stripParentheses(
-        parseVarArgs(jsType, parseNull(jsType, parseOptional(jsType, rawType))));
-    final String[] pTypes = pType.split("\\|");
-    for (final String sType : pTypes) {
-      if ("undefined".equals(sType) || "null".equals(sType)) {
-        jsType.setNull();
-      } else if (!parseAsFunction(jsType, sType))
-        jsType.addType(parseAsGenericType(sType));
-    }
-    return jsType;
+    return typeParser(stripParentheses(rawType));
   }
 
   private String stripParentheses(final String type) {
@@ -58,105 +45,155 @@ public class JsTypeParser {
     return strippedType;
   }
 
-  String parseNull(final JsType jsType, final String type) {
-    final String rType;
-    if (type.startsWith("!")) {
-      jsType.setNotNull();
-      rType = type.substring(1);
-    } else if (type.startsWith("?")) {
-      jsType.setNull();
-      rType = type.substring(1);
+  private JsType typeParser(final String rawType) {
+    final char[] chars = rawType.toCharArray();
+    final JsType root;
+    final List<JsType> types = typeParser(rawType, chars, new AtomicInteger());
+    if (types.size() == 1) {
+      root = types.get(0);
     } else {
-      rType = type;
+      root = new JsType(rawType);
+      root.addChoices(types);
     }
-    return rType;
+    return root;
   }
 
-  /**
-   * Parse optional types. These type end with '='.
-   * @param jsType
-   * @param type
-   * @return
-   */
-  String parseOptional(final JsType jsType, final String type) {
-    final String rType;
-    if (type.endsWith("=")) {
-      jsType.setOptional();
-      rType = type.substring(0, type.length() - 1);
-    } else {
-      rType = type;
-    }
-    return rType;
-  }
-
-  /**
-   * Parse var-args type; i.e. starts with 3 dots.
-   * @param jsType structured type
-   * @param type raw type to check
-   * @return raw type with 3 dots removed if present
-   */
-  String parseVarArgs(final JsType jsType, final String type) {
-    final String rType;
-    if (type.startsWith("...")) {
-      jsType.setVarArgs();
-      rType = type.substring(3);
-    } else {
-      rType = type;
-    }
-    return rType;
-  }
-
-  /**
-   * Checks if type is function and if so mark type as function.
-   * @param jsType type object
-   * @param type type to parse
-   * @return true if type is function
-   */
-  private boolean parseAsFunction(final JsType jsType, final String type) {
-    final boolean function;
-    if (type.contains("{") || type.contains("function(")) {
-      jsType.setFunction();
-      function = true;
-    } else {
-      function = false;
-    }
-    return function;
-  }
-
-  JsTypeSpec parseAsGenericType(final String type) {
-    final Matcher matcher2 = GENERIC_TYPE_PATTERN.matcher(type);
-    final JsTypeSpec ts;
-    if (matcher2.find()) {
-      ts = new JsTypeSpec(matcher2.group(1), type);
-      final List<String> generics = parseGenericArgs(matcher2.group(2));
-      for (final String arg: generics) {
-        ts.addGeneric(parseAsGenericType(arg));
+  private List<JsType> typeParser(final String rawType, final char[] chars,
+      final AtomicInteger idx) {
+    int startPos = idx.get();
+    int startPosChoices = startPos;
+    int nameEndPos = startPos;
+    int endPos;
+    boolean notNull = false, canNull = false, optional = false, varArgs = false,
+        newType = false, decreaseDepth = false, inFunction = false,
+        endFunction = false, param = false;
+    final List<JsType> types = new ArrayList<>();
+    final List<JsType> choices = new ArrayList<>();
+    List<JsType> subTypes = null;
+    for (; idx.get() < chars.length; idx.incrementAndGet()) {
+      final int i = idx.get();
+      endPos = i;
+      switch (chars[i]) {
+      case 'f':
+        if (rawType.substring(i).startsWith(FUNCTION)) {
+          inFunction = true;
+        }
+        break;
+      case ')':
+        endFunction = true;
+        break;
+      case ' ':
+        if (startPos == endPos) {
+          startPos++;
+        } else {
+          newType = true;
+          endPos--;
+        }
+        break;
+      case '.': // generic or varargs .... varargs before
+        if (chars[i+1] == '<') {
+          endPos--;
+          nameEndPos = endPos;
+          idx.incrementAndGet(); // skip past '<'
+          idx.incrementAndGet();
+          subTypes = typeParser(rawType, chars, idx);
+        } else if (chars[i+1] == '.' && (chars[i+2] == '.')) {
+          varArgs = true;
+          idx.addAndGet(2); // skip ...
+          startPos = i + 3;
+        }
+        break;
+      case ',':
+        // set inFunction to false  when we passed the end of the function,
+        // But ONLY when inFunction is already true
+        inFunction = inFunction && !endFunction;
+        param = true;
+        newType = true;
+        endPos--;
+        break;
+      case '<':
+        // should not happen...
+        break;
+      case '>':
+        decreaseDepth = true;
+        newType = true;
+        endPos--;
+        break;
+      case '|': // new choice argument
+        newType = true;
+        endPos--;
+        break;
+      case '!': // argument can't be null. !  is positioned before type
+        notNull = true;
+        startPos++;
+        break;
+      case '?': // argument can be null. ? is positioned before type
+        if (startPos == endPos) {
+          canNull = true;
+          startPos++;
+        }
+        break;
+      case '=': // optional argument. = is positioned after type
+        optional = true;
+        endPos--;
+        // is last so we can finish type
+        break;
+      default:
+        break;
       }
-    } else {
-      ts = new JsTypeSpec(type, type);
-    }
-    return ts;
-  }
-
-  private List<String> parseGenericArgs(final String args) {
-    final char[] chars = args.toCharArray();
-    final List<String> gArgs = new ArrayList<>();
-    int depth = 0;
-    int spos = 0;
-    int i = 0;
-    for (; i < chars.length; i++) {
-      if (chars[i] == '<') {
-        depth++;
-      } else if (chars[i] == '>') {
-        depth--;
-      } else if (chars[i] == ',' && depth == 0) {
-        gArgs.add(args.substring(spos, i).trim());
-        spos = i;
+      if (subTypes == null) {
+        nameEndPos = endPos;
+      }
+      boolean lastToken = idx.get() == chars.length - 1;
+      if ((!inFunction && newType) || lastToken) {
+        final String sType = rawType.substring(startPos, endPos + 1);
+        final String name = rawType.substring(startPos, nameEndPos + 1);
+        boolean withNull = false;
+        if ("undefined".equals(sType) || "null".equals(sType)) {
+          withNull = true;
+        } else {
+          final JsType jsType = new JsType(name, sType);
+          jsType.setFunction(sType.startsWith(FUNCTION));
+          jsType.setVarArgs(varArgs);
+          jsType.setNotNull(notNull);
+          jsType.setNull(canNull);
+          jsType.setOptional(optional);
+          jsType.addSubTypes(subTypes);
+          choices.add(jsType);
+        }
+        lastToken = idx.get() == chars.length - 1;
+        if (param || decreaseDepth || lastToken) {
+          if (choices.size() == 1) {
+            choices.get(0).setNull(withNull);
+            types.add(choices.get(0));
+          } else {
+            final JsType choicesType =
+                new JsType(rawType.substring(startPosChoices, endPos + 1));
+            choicesType.setNull(withNull);
+            choicesType.addChoices(choices);
+            types.add(choicesType);
+          }
+          choices.clear();
+          if (decreaseDepth || lastToken) {
+            return types;
+          }
+          if (param) {
+            startPosChoices = i + 1;
+          }
+        }
+        startPos = idx.get() + 1;
+        newType = false;
+        param = false;
+        varArgs = false;
+        notNull = false;
+        canNull = false;
+        optional = false;
+        inFunction = false;
+        endFunction = false;
+        decreaseDepth = false;
+        subTypes = null;
       }
     }
-    if (spos != i) {
-      gArgs.add(args.substring(spos, i).trim());
-    }
-    return gArgs;
+    return types;
   }
 }
