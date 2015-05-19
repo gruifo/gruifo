@@ -16,7 +16,6 @@
 package gruifo.output.jsni;
 
 import gruifo.lang.java.JClass;
-import gruifo.lang.java.JClass.EnumValue;
 import gruifo.lang.java.JMethod;
 import gruifo.lang.js.JsFile;
 import gruifo.output.FilePrinter;
@@ -24,14 +23,16 @@ import gruifo.output.PrintUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
+//TODO @interface should be printed as real interface not as class.
+//
 public class JSNIPrinter implements FilePrinter {
 
   private final Transformer transformer = new Transformer();
   private final JSNIMethodPrinter mPrinter = new JSNIMethodPrinter();
   private final JSNIFieldPrinter fPrinter = new JSNIFieldPrinter();
+  private final JSNIEnumPrinter ePrinter = new JSNIEnumPrinter();
 
   @Override
   public String printFile(final JsFile jsFile) {
@@ -45,27 +46,35 @@ public class JSNIPrinter implements FilePrinter {
     printPackageName(buffer, jFile.getPackageName());
     printImports(buffer, jFile.getImports());
     jFile.setStatic(false); //FIXME setting static should not be done here
-    printJClass(jFile, indent, buffer);
+    printJClassOrEnum(jFile, indent, buffer);
     return buffer.toString();
+  }
+
+  private void printJClassOrEnum(final JClass jFile, final int indent,
+      final StringBuffer buffer) {
+    PrintUtil.indent(buffer, jFile.getClassDescription(), indent);
+    if (jFile.getEnumValues().isEmpty()) {
+      printJClass(jFile, indent, buffer);
+    } else {
+      ePrinter.printEnum(buffer, indent, jFile.getPackageName(),
+          jFile.getClassOrInterfaceName(), jFile.getEnumValues());
+    }
+    PrintUtil.nl(buffer);
+    buffer.append('}'); // close file
+    PrintUtil.nl(buffer);
   }
 
   private void printJClass(final JClass jFile, int indent,
       final StringBuffer buffer) {
     printClass(buffer, jFile, indent);
     indent++;
-    printEnumFields(buffer, indent, jFile.getPackageName(),
-        jFile.getClassOrInterfaceName(), jFile.getEnumValues());
-    if (jFile.getEnumValues().isEmpty()) {
-      printConstructors(indent, buffer, jFile);
-    }
+    printConstructors(indent, buffer, jFile);
     fPrinter.printFields(buffer, indent, jFile);
     mPrinter.printMethods(buffer, indent, jFile);
     for (final JClass innerFile: jFile.getInnerJFiles()) {
       innerFile.setStatic(true); //FIXME setting static should not be done here
-      printJClass(innerFile, indent, buffer);
+      printJClassOrEnum(innerFile, indent, buffer);
     }
-    buffer.append('}'); // close file
-    PrintUtil.nl(buffer);
   }
 
   private void printPackageName(final StringBuffer buffer,
@@ -90,7 +99,6 @@ public class JSNIPrinter implements FilePrinter {
 
   private void printClass(final StringBuffer buffer, final JClass jFile,
       final int indent) {
-    PrintUtil.indent(buffer, jFile.getClassDescription(), indent);
     PrintUtil.indent(buffer, indent);
     buffer.append("public ");
     if (jFile.isStatic()) {
@@ -103,6 +111,9 @@ public class JSNIPrinter implements FilePrinter {
       buffer.append(" extends ");
       buffer.append(jFile.getExtends());
     }
+    //    if (!jFile.getImplements().isEmpty()) {
+    //      LOG.error("TODO 'IMPLEMENTS' in {}", fileName);
+    //    }
     buffer.append(" {");
     PrintUtil.nl(buffer);
   }
@@ -114,50 +125,6 @@ public class JSNIPrinter implements FilePrinter {
       buffer.append(" extends ");
       buffer.append(TypeMapper.GWT_JAVA_SCRIPT_OBJECT);
       buffer.append("> ");
-    }
-  }
-
-  private void printEnumFields(final StringBuffer buffer, final int indent,
-      final String packageName, final String className,
-      final List<EnumValue> enumValues) {
-    for (final EnumValue enumValue : enumValues) {
-      PrintUtil.indent(buffer, enumValue.getJavaDoc(), indent);
-      PrintUtil.indent(buffer, indent);
-      buffer.append("public static final ");
-      buffer.append(enumValue.getType());
-      buffer.append(' ');
-      buffer.append(enumValue.getName());
-      buffer.append(" = get");
-      buffer.append(
-          PrintUtil.firstCharUpper(enumValue.getName().toLowerCase()));
-      buffer.append("();");
-      PrintUtil.nl2(buffer);
-    }
-    if (!enumValues.isEmpty()) {
-      // print private constructor.
-      printConstructor(buffer, indent, "private", className);
-    }
-    // print private native methods.
-    for (final EnumValue enumValue : enumValues) {
-      PrintUtil.indent(buffer, indent);
-      buffer.append("private static native final ");
-      buffer.append(' ');
-      buffer.append(enumValue.getType());
-      buffer.append(" get");
-      buffer.append(
-          PrintUtil.firstCharUpper(enumValue.getName().toLowerCase()));
-      buffer.append("() /*-{");
-      PrintUtil.nl(buffer);
-      PrintUtil.indent(buffer, indent+1);
-      buffer.append("return $wnd.");
-      buffer.append(packageName + "." + className);
-      buffer.append('.');
-      buffer.append(enumValue.getName());
-      buffer.append(';');
-      PrintUtil.nl(buffer);
-      PrintUtil.indent(buffer, indent);
-      buffer.append("}-*/;");
-      PrintUtil.nl(buffer);
     }
   }
 

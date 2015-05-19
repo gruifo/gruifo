@@ -35,6 +35,11 @@ public final class PrintUtil {
     }
   }
 
+  public static void nlIndent(final StringBuffer buffer, final int indent) {
+    nl(buffer);
+    indent(buffer, indent);
+  }
+
   public static void indent(final StringBuffer buffer, final int indent) {
     buffer.append(new String(new char[indent * 2]).replace('\0', ' '));
   }
