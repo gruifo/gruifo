@@ -193,7 +193,7 @@ public class JavaScriptDocParser {
         doc.setMethod();
         break;
       case IMPLEMENTS:
-        LOG.error("TODO 'IMPLEMENTS' in {}", fileName);
+        doc.addImplements(parseType(line, fileName));
         break;
       case INHERITDOC:
       case OVERRIDE:

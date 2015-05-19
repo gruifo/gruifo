@@ -80,15 +80,20 @@ public class JsElement {
   private ElementType elementType;
   private boolean classDesc;
   private String jsDoc;
-  private JsType _extends;
+  private JsType extendsType;
+  private final List<JsType> implementsTypes = new ArrayList<>();
   private final List<JsParam> params = new ArrayList<>();
   private List<JsParam> typeDef;
   private JsType type;
-  private JsType _return;
+  private JsType returnType;
   private boolean override;
   private String genericType;
   private JsType define;
   private JsType enumType;
+
+  public void addImplements(final JsType parseType) {
+    implementsTypes.add(parseType);
+  }
 
   public String getJsDoc() {
     return jsDoc;
@@ -107,13 +112,16 @@ public class JsElement {
   }
 
   public JsType getExtends() {
-    return _extends;
+    return extendsType;
   }
 
   public String getGenericType() {
     return genericType;
   }
 
+  public List<JsType> getImplements() {
+    return implementsTypes;
+  }
   public List<JsParam> getParams() {
     return params;
   }
@@ -127,7 +135,7 @@ public class JsElement {
   }
 
   public JsType getReturn() {
-    return _return;
+    return returnType;
   }
 
   public boolean isClass() {
@@ -201,7 +209,7 @@ public class JsElement {
   }
 
   public void setExtends(final JsType _extends) {
-    this._extends = _extends;
+    this.extendsType = _extends;
   }
 
   public void setGenericType(final String genericType) {
@@ -233,7 +241,7 @@ public class JsElement {
   }
 
   public void setReturn(final JsType _return) {
-    this._return = _return;
+    this.returnType = _return;
   }
 
   public void setType(final JsType type) {
@@ -250,8 +258,8 @@ public class JsElement {
   public String toString() {
     return "JsElement [accessType=" + accessType + ", elementType="
         + elementType + ", classDesc=" + classDesc + ", comment=" + jsDoc
-        + ", _extends=" + _extends + ", params=" + params + ", typeDef="
-        + typeDef + ", type=" + type + ", _return=" + _return + ", override="
+        + ", _extends=" + extendsType + ", params=" + params + ", typeDef="
+        + typeDef + ", type=" + type + ", _return=" + returnType + ", override="
         + override + ", genericType=" + genericType + ", define=" + define
         + "]";
   }

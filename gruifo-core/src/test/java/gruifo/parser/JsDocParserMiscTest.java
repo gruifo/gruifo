@@ -44,6 +44,11 @@ public class JsDocParserMiscTest extends JsDocParserTestBase {
     assertEquals("extends", "nl.Object", jsElement.getExtends().getName());
   }
 
+  @Test
+  public void testImplements() {
+    assertEquals("implements", "nl.Object2",
+        jsElement.getImplements().get(0).getName());
+  }
 
   @Test
   public void testReturn() {

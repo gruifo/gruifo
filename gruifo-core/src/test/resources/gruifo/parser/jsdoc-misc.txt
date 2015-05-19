@@ -12,6 +12,7 @@
  * @protected
  * @return {nl.Object|undefined}
  * @extends {nl.Object}
+ * @implements {nl.Object2}
  * @template S,T,U
  * @typedef {Array.<number>}
  */
