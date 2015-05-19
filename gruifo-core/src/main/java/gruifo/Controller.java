@@ -71,21 +71,27 @@ public class Controller {
   }
 
   public void run(final FilePrinter printer) {
-    final List<File> files = new ArrayList<>();
+    final List<JsFile> jsFiles = new ArrayList<>();
+
     for (final File srcPath : srcPaths) {
+      final List<File> files = new ArrayList<>();
       scanJsFiles(files, srcPath);
-    }
-    for (final File file : files) {
-      try {
-        final Collection<JsFile> jsFiles =
-            prepareFiles(parseFile(file.getPath()));
-        writeFiles(printer, jsFiles, outputPath);
-      } catch (final IOException e) {
-        LOG.error("Exception parsing file:" + file, e);
+      for (final File file : files) {
+        try {
+          jsFiles.addAll(prepareFiles(parseFile(file.getPath())));
+        } catch (final IOException e) {
+          LOG.error("Exception parsing file:" + file, e);
+        }
       }
     }
+    writeFiles(printer, jsFiles, outputPath);
   }
 
+  /**
+   * Scans the srcPath for JavaScript files and adds them to the files list.
+   * @param files list of JavaScript files found
+   * @param srcPath source path to search for files
+   */
   void scanJsFiles(final List<File> files, final File srcPath) {
     if (srcPath.isFile()) {
       files.add(srcPath);
@@ -100,15 +106,15 @@ public class Controller {
     }
   }
 
-  Collection<JsFile> parseFile(final String file)
+  Collection<JsFile> parseFile(final String fileName)
       throws FileNotFoundException, IOException {
-    try (final Reader reader = new FileReader(file)) {
+    try (final Reader reader = new FileReader(fileName)) {
       final CompilerEnvirons env = new CompilerEnvirons();
       env.setRecordingLocalJsDocComments(true);
       env.setAllowSharpComments(true);
       env.setRecordingComments(true);
-      final AstRoot node = new Parser(env).parse(reader, file, 1);
-      final JavaScriptFileParser parser = new JavaScriptFileParser(file);
+      final AstRoot node = new Parser(env).parse(reader, fileName, 1);
+      final JavaScriptFileParser parser = new JavaScriptFileParser(fileName);
       node.visitAll(parser);
       return parser.getFiles();
     }
@@ -160,15 +166,20 @@ public class Controller {
   }
 
   void writeFiles(final FilePrinter printer, final Collection<JsFile> jsFiles,
-      final File outputPath) throws IOException {
-    for (final JsFile javaFile : jsFiles) {
-      final String packagePath = javaFile.getPackageName().replace('.', '/');
+      final File outputPath) {
+    for (final JsFile jsFile : jsFiles) {
+      final String packagePath = jsFile.getPackageName().replace('.', '/');
       final File path = new File(outputPath, packagePath);
       path.mkdirs();
-      try (final FileWriter writer = new FileWriter(
-          new File(path, javaFile.getClassOrInterfaceName() + JAVA_EXT))) {
-        writer.append(printer.printFile(javaFile));
-        writer.flush();
+      try {
+        try (final FileWriter writer = new FileWriter(
+            new File(path, jsFile.getClassOrInterfaceName() + JAVA_EXT))) {
+          writer.append(printer.printFile(jsFile));
+          writer.flush();
+        }
+      } catch (final IOException e) {
+        LOG.error("Exception parsing file:"
+            + jsFile.getOriginalFileName(), e);
       }
     }
   }
