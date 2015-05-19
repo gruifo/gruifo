@@ -30,19 +30,19 @@ public final class TypeMapper {
   public static final TypeMapper INSTANCE = new TypeMapper();
 
   private final Map<String, String> mapper = new HashMap<>();
-  private final Map<String, String> nativeMapper = new HashMap<>();
+  private final Map<String, String> primitiveMapper = new HashMap<>();
   private final Map<String, String> genericMapper = new HashMap<>();
   private final Set<String> ignores = new HashSet<>();
   private final Map<String, String> replaceTypes = new HashMap<>();
 
   private TypeMapper() {
-    nativeMapper.put("void", "void");
-    nativeMapper.put("string", "String");
-    nativeMapper.put("int", "int");
-    nativeMapper.put("double", "double");
-    nativeMapper.put("float", "float");
-    nativeMapper.put("boolean", "boolean");
-    nativeMapper.put("number", "double");
+    primitiveMapper.put("void", "void");
+    primitiveMapper.put("string", "String");
+    primitiveMapper.put("int", "int");
+    primitiveMapper.put("double", "double");
+    primitiveMapper.put("float", "float");
+    primitiveMapper.put("boolean", "boolean");
+    primitiveMapper.put("number", "double");
 
     genericMapper.put("void", "Void");
     genericMapper.put("string", "String");
@@ -87,9 +87,18 @@ public final class TypeMapper {
     return ignores.contains(clazz + "$" + method);
   }
 
+  /**
+   * Returns true if typeToCheck is a primitive type.
+   * @param typeToCheck type to check
+   * @return true if is primitive
+   */
+  public boolean isPrimitive(final String typeToCheck) {
+    return primitiveMapper.containsKey(typeToCheck);
+  }
+
   public String mapType(final String typeToMap, final boolean generic) {
     return mapOtherType(generic
-        ? mapGenericType(typeToMap) : mapNativeType(typeToMap));
+        ? mapGenericType(typeToMap) : mapPrimitiveType(typeToMap));
   }
 
   /**
@@ -99,7 +108,7 @@ public final class TypeMapper {
    * @return
    */
   public String mapType(final String typeToMap) {
-    return mapOtherType(mapNativeType(typeToMap));
+    return mapOtherType(mapPrimitiveType(typeToMap));
   }
 
   private String mapOtherType(final String typeToMap) {
@@ -112,9 +121,9 @@ public final class TypeMapper {
         genericMapper.get(typeToMap) : typeToMap;
   }
 
-  private String mapNativeType(final String typeToMap) {
-    return nativeMapper.containsKey(typeToMap)
-        ? nativeMapper.get(typeToMap) : typeToMap;
+  private String mapPrimitiveType(final String typeToMap) {
+    return primitiveMapper.containsKey(typeToMap)
+        ? primitiveMapper.get(typeToMap) : typeToMap;
   }
 
   public String replaceType(final String fullClassName, final String methodName,
