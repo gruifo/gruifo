@@ -50,11 +50,12 @@ public class JClass {
   private final List<EnumValue> enumValues = new ArrayList<>();
   private String headerComment = "";
   private final List<JClass> innerJFil = new ArrayList<>();
-  private boolean _static;
+  private boolean staticClass;
   private String classDescription;
 
   private final List<JMethod> constructors = new ArrayList<>();
-  private String _extends;
+  private final List<String> implementsTypes = new ArrayList<>();
+  private String extendsType;
   private String classGeneric;
   private boolean dataClass;
 
@@ -78,8 +79,12 @@ public class JClass {
     return jParam;
   }
 
+  public void addImplements(final String implementsType) {
+    implementsTypes.add(implementsType);
+  }
+
   public void addInnerJFile(final JClass JClass) {
-    _static = true;
+    staticClass = true;
     innerJFil.add(JClass);
   }
 
@@ -87,21 +92,28 @@ public class JClass {
     methods.add(method);
   }
 
+  public String getClassDescription() {
+    return classDescription;
+  }
 
-  public void setExtends(final String _extends) {
-    this._extends = _extends;
+  public String getClassGeneric() {
+    return classGeneric;
   }
 
   public String getClassOrInterfaceName() {
     return classOrInteraceName;
   }
 
-  public String getClassDescription() {
-    return classDescription;
+  public List<JMethod> getConstructors() {
+    return constructors;
   }
 
   public List<EnumValue> getEnumValues() {
     return enumValues;
+  }
+
+  public String getExtends() {
+    return extendsType;
   }
 
   public List<JParam> getFields() {
@@ -114,6 +126,10 @@ public class JClass {
 
   public String getHeaderComment() {
     return headerComment;
+  }
+
+  public List<String> getImplements() {
+    return implementsTypes;
   }
 
   public Set<String> getImports() {
@@ -132,44 +148,36 @@ public class JClass {
     return packageName;
   }
 
+  public boolean isDataClass() {
+    return dataClass;
+  }
+
   public boolean isStatic() {
-    return _static;
+    return staticClass;
   }
 
   public void setClassDescription(final String classDescription) {
     this.classDescription = classDescription;
   }
 
+  public void setClassGeneric(final String classGeneric) {
+    this.classGeneric = classGeneric;
+  }
+
+  // true if not a @class annotation but a @typdef annotation
+  public void setDataClass(final boolean dataClass) {
+    this.dataClass = dataClass;
+  }
+
+  public void setExtends(final String extendsType) {
+    this.extendsType = extendsType;
+  }
+
   public void setHeaderComment(final String headerComment) {
     this.headerComment = headerComment;
   }
 
-  public void setStatic(final boolean _static) {
-    this._static = _static;
-  }
-
-  public String getClassGeneric() {
-    return classGeneric;
-  }
-
-  public List<JMethod> getConstructors() {
-    return constructors;
-  }
-
-  public String getExtends() {
-    return _extends;
-  }
-
-  public boolean isDataClass() {
-    return dataClass;
-  }
-
-  public void setClassGeneric(final String classGeneric) {
-    this.classGeneric = classGeneric;
-
-  }
-
-  public void setDataClass(final boolean dataClass) {
-    this.dataClass = dataClass;
+  public void setStatic(final boolean staticClass) {
+    this.staticClass = staticClass;
   }
 }

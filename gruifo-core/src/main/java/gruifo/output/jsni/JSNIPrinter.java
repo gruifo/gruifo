@@ -25,9 +25,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 //TODO @interface should be printed as real interface not as class.
 //
 public class JSNIPrinter implements FilePrinter {
+  private static final Logger LOG = LoggerFactory.getLogger(JSNIPrinter.class);
 
   private final Transformer transformer = new Transformer();
   private final JSNIMethodPrinter mPrinter = new JSNIMethodPrinter();
@@ -111,9 +115,9 @@ public class JSNIPrinter implements FilePrinter {
       buffer.append(" extends ");
       buffer.append(jFile.getExtends());
     }
-    //    if (!jFile.getImplements().isEmpty()) {
-    //      LOG.error("TODO 'IMPLEMENTS' in {}", fileName);
-    //    }
+    if (!jFile.getImplements().isEmpty()) {
+      LOG.error("TODO generate 'implements' in {}", jFile.getFullClassName());
+    }
     buffer.append(" {");
     PrintUtil.nl(buffer);
   }
