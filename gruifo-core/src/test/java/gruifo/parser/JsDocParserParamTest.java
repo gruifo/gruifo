@@ -77,4 +77,12 @@ public class JsDocParserParamTest extends JsDocParserTestBase {
     assertTrue("params 11 should be function",
         jsElement.getParams().get(11).getType().isFunction());
   }
+
+  @Test
+  public void testReturn() {
+    assertEquals("return type 1", "Array.<number>",
+        jsElement.getReturn().getRawType());
+    assertEquals("return type 1", "number",
+        jsElement.getReturn().getTypeList().get(0).getName());
+  }
 }

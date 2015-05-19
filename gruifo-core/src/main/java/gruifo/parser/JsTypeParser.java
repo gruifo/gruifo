@@ -97,6 +97,7 @@ public class JsTypeParser {
           idx.incrementAndGet(); // skip past '<'
           idx.incrementAndGet();
           subTypes = typeParser(rawType, chars, idx);
+          endPos = idx.get();
         } else if (chars[i+1] == '.' && (chars[i+2] == '.')) {
           varArgs = true;
           idx.addAndGet(2); // skip ...

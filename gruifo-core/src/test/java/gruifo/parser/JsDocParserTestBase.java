@@ -23,7 +23,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class JsDocParserTestBase {
+class JsDocParserTestBase {
 
   protected JsElement jsElement;
 

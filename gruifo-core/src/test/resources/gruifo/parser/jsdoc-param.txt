@@ -15,4 +15,5 @@
  * @param {*} any any type
  * @param {?} anyNull any type, no type checking
  * @param {Object.<string, *>}  string_objects
+ * @return {Array.<number>} Resolutions.
  */
