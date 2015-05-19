@@ -134,10 +134,9 @@ public class JavaScriptFileParser implements NodeVisitor {
         // fileName);
       }
     } else if (isPrototype(enumName)) {
-      //FIXME these are methods with inherited behavoir
-      LOG.error("Enum '{}' not parsed in: {}", enumName, fileName);
-      //      addMethod(enumName, element);
+      addMethod(enumName, element, false).setAbstract(true);
     } else if (element.isConst()){
+      LOG.error("Const element '{}' not parsed in: {}", enumName, fileName);
       //FIXME if const added before class itself file is created twice.
       // also const element not at toplevel because it's a field not toplevel.
       //addConst(enumName, element);
@@ -182,7 +181,7 @@ public class JavaScriptFileParser implements NodeVisitor {
     }
   }
 
-  private void addMethod(final String methodOrClassName,
+  private JsMethod addMethod(final String methodOrClassName,
       final JsElement element, final boolean constructor) {
     final JsMethod method = parseMethod(methodOrClassName, constructor);
     if (method != null) {
@@ -194,6 +193,7 @@ public class JavaScriptFileParser implements NodeVisitor {
         jsFile.addMethod(method);
       }
     }
+    return method;
   }
 
   private void addAsField(final String name, final JsElement element) {

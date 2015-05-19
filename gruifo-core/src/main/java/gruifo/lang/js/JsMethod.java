@@ -20,6 +20,7 @@ import gruifo.lang.AccessType;
 public class JsMethod {
 
   private JsElement element;
+  private boolean abstractMethod;
   private String methodName;
   private final String packageName;
 
@@ -42,6 +43,14 @@ public class JsMethod {
 
   public String getMethodName() {
     return methodName;
+  }
+
+  public boolean isAbstractMethod() {
+    return abstractMethod;
+  }
+
+  public void setAbstract(final boolean abstractMethod) {
+    this.abstractMethod = abstractMethod;
   }
 
   public void setElement(final JsElement element) {

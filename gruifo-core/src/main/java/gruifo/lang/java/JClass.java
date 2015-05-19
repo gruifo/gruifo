@@ -148,6 +148,15 @@ public class JClass {
     return packageName;
   }
 
+  public boolean hasAbstractMethods() {
+    for (final JMethod jMethod : methods) {
+      if (jMethod.isAbstractMethod()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public boolean isDataClass() {
     return dataClass;
   }

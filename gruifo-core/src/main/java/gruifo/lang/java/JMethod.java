@@ -9,10 +9,11 @@ public class JMethod {
   private String methodName;
   private final String classPath;
   private final AccessType accessType;
-  private String _return;
+  private String returnType;
   private final List<JParam> params = new ArrayList<>();
   private String jsDoc;
   private String genericType;
+  private boolean abstractMethod;
 
   public JMethod(final String classPath, final String functionName, final AccessType accessType) {
     this.classPath = classPath;
@@ -49,7 +50,15 @@ public class JMethod {
   }
 
   public String getReturn() {
-    return _return;
+    return returnType;
+  }
+
+  public boolean isAbstractMethod() {
+    return abstractMethod;
+  }
+
+  public void setAbstract(final boolean abstractMethod) {
+    this.abstractMethod = abstractMethod;
   }
 
   public void setJsDoc(final String jsDoc) {
@@ -64,7 +73,7 @@ public class JMethod {
     this.methodName = methodName;
   }
 
-  public void setReturn(final String _return) {
-    this._return = _return;
+  public void setReturn(final String returnType) {
+    this.returnType = returnType;
   }
 }

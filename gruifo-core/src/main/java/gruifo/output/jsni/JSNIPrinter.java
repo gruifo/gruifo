@@ -108,6 +108,9 @@ public class JSNIPrinter implements FilePrinter {
     if (jFile.isStatic()) {
       buffer.append("static ");
     }
+    if (jFile.hasAbstractMethods()) {
+      buffer.append("abstract ");
+    }
     buffer.append("class ");
     buffer.append(jFile.getClassOrInterfaceName());
     printClassExtend(buffer, jFile.getClassGeneric());

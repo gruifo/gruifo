@@ -60,6 +60,7 @@ class Transformer {
       jFile.setExtends(null); // FIXME: setExtends(null) needed?
     }
     setExtends(jFile, jsFile);
+    setImplements(jFile, jsFile);
     transformEnumFields(jFile, jsFile.getElement().getEnumType(),
         jsFile.getEnumValues());
     transformFields(jFile, jsFile.getFields());
@@ -118,6 +119,13 @@ class Transformer {
       jFile.setExtends(extendsType == null
           ? TypeMapper.GWT_JAVA_SCRIPT_OBJECT
               : transformSingleType(extendsType));
+    }
+  }
+
+  private void setImplements(final JClass jFile, final JsFile jsFile) {
+    final List<JsType> implementsTypes = jsFile.getElement().getImplements();
+    for (final JsType jsType : implementsTypes) {
+      jFile.addImplements(transformSingleType(jsType));
     }
   }
 
@@ -225,6 +233,7 @@ class Transformer {
     final JMethod jMethod = new JMethod(jsMethod.getPackageName(),
         jsMethod.getMethodName(), jsMethod.getAccessType());
     jMethod.setJsDoc(jsMethod.getElement().getJsDoc());
+    jMethod.setAbstract(jsMethod.isAbstractMethod());
     setReturnType(jsMethod, jMethod);
     for (final JParam param : params) {
       jMethod.addParam(filterParam(jFile, jMethod, param));

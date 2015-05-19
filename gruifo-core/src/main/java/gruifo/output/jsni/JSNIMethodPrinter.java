@@ -33,7 +33,11 @@ class JSNIMethodPrinter {
       PrintUtil.indent(buffer, method.getJsDoc(), indent);
       PrintUtil.indent(buffer, indent);
       buffer.append(appendAccessType(method.getAccessType()));
-      buffer.append("final native ");
+      if (method.isAbstractMethod()) {
+        buffer.append(" /* abstract */ ");
+      } else {
+        buffer.append("final native ");
+      }
       if (method.getGenericType() != null) {
         buffer.append('<');
         buffer.append(method.getGenericType());
@@ -46,11 +50,34 @@ class JSNIMethodPrinter {
       buffer.append(method.getMethodName());
       buffer.append('(');
       printMethodParam(buffer, method, true);
-      buffer.append(") /*-{");
-      PrintUtil.nl(buffer);
-      printMethodBody(buffer, indent + 1, method);
-      PrintUtil.indent(buffer, indent);
-      buffer.append("}-*/;");
+      buffer.append(')');
+      if (method.isAbstractMethod()) {
+        // FIXME instead of making it a real abstract method return dummy
+        // Problem is some implementing methods use @inheritsDoc annotation
+        // and then they are ignored resulting in invalid files when the method
+        // in the super class is generated as abstract method. However if all
+        // abstract methods would be generated as normal methods some classes
+        // do implement the override as normal methods without the @inheritsDoc
+        // annotation and then these methods would be in error because the
+        // parent method is final.
+        buffer.append(" {");
+        if (!isVoidType(method)) {
+          buffer.append(" return ");
+          if (TypeMapper.INSTANCE.isPrimitive(method.getReturn())) {
+            //FIXME return correct dummy value, for booleans this is not working.
+            buffer.append("0;");
+          } else {
+            buffer.append("null;");
+          }
+        }
+        buffer.append("}");
+      } else {
+        buffer.append(" /*-{");
+        PrintUtil.nl(buffer);
+        printMethodBody(buffer, indent + 1, method);
+        PrintUtil.indent(buffer, indent);
+        buffer.append("}-*/;");
+      }
       PrintUtil.nl2(buffer);
     }
   }
@@ -94,13 +121,17 @@ class JSNIMethodPrinter {
   private void printMethodBody(final StringBuffer buffer,
       final int indent, final JMethod method) {
     PrintUtil.indent(buffer, indent);
-    buffer.append("void".equals(method.getReturn()) ? "" : "return ");
+    buffer.append(isVoidType(method) ? "" : "return ");
     buffer.append("this.");
     buffer.append(method.getMethodName());
     buffer.append('(');
     printMethodParam(buffer, method, false);
     buffer.append(");");
     PrintUtil.nl(buffer);
+  }
+
+  private boolean isVoidType(final JMethod method) {
+    return "void".equals(method.getReturn());
   }
 
   // enum types should be print as follows:
