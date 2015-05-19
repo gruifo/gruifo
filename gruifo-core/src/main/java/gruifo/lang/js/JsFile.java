@@ -31,12 +31,18 @@ public class JsFile {
   private final String classOrInteraceName;
   private final boolean _interface;
   private JsElement element;
+  private final String orginalFileName;
 
-  public JsFile(final String packageName, final String className,
-      final boolean _interface) {
+  public JsFile(final String orginalFileName, final String packageName,
+      final String className, final boolean _interface) {
+    this.orginalFileName = orginalFileName;
     this.packageName = packageName;
     this.classOrInteraceName = className;
     this._interface = _interface;
+  }
+
+  public String getOriginalFileName() {
+    return orginalFileName;
   }
 
   public void addConst(final String constName, final JsElement element) {

@@ -50,7 +50,7 @@ public class JavaScriptFileParser implements NodeVisitor {
   private static final String PROTOTYPE = "prototype";
   private static final Pattern PROTOTYPE_PATTERN =
       Pattern.compile("((.+)\\.([^\\.]+))\\." + PROTOTYPE + "\\.(.+)");
-  public Map<String, JsFile> files = new HashMap<>();
+  private final Map<String, JsFile> files = new HashMap<>();
   private final JavaScriptDocParser parser = new JavaScriptDocParser();
 
   private final String fileName;
@@ -225,7 +225,7 @@ public class JavaScriptFileParser implements NodeVisitor {
     if (files.containsKey(className)) {
       jsFile = files.get(className);
     } else {
-      jsFile = new JsFile(packageName, className, false);
+      jsFile = new JsFile(fileName, packageName, className, false);
       jsFile.setElement(element);
       files.put(className, jsFile);
     }
@@ -235,7 +235,7 @@ public class JavaScriptFileParser implements NodeVisitor {
 
   JsFile parseClassOrInterfaceName(final String name, final boolean _interface) {
     final int classNameIdx = name.lastIndexOf('.');
-    return new JsFile(name.substring(0, classNameIdx),
+    return new JsFile(fileName, name.substring(0, classNameIdx),
         name.substring(classNameIdx + 1), _interface);
   }
 
