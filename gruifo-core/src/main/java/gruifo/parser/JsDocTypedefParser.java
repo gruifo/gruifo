@@ -35,6 +35,8 @@ class JsDocTypedefParser {
 
   private static final Pattern TYPE_DEF_PATTERN = Pattern
       .compile("\\{\\{(.*)\\}\\}");
+  private static final Pattern TYPE_DEF__RETURN_PATTERN = Pattern
+      .compile("\\{(.*)\\}");
 
   private final JsTypeParser jsTypeParser;
 
@@ -47,10 +49,8 @@ class JsDocTypedefParser {
     if (lines[i].contains("{{")) {
       i = parseTypeClass(doc, lines, i, fileName);
     } else {
-      LOG.error("type {} not processed in file {}", lines[i], fileName);
-      // FIXME final List<JsParam> tdList = new ArrayList<>();
-      // tdList.add(parseType(lines[i], fileName))
-      // doc.setTypeDef(tdList);
+      doc.setExtends(jsTypeParser.parseType(
+          findValues(lines[i], TYPE_DEF__RETURN_PATTERN)));
     }
     return i;
   }
@@ -62,7 +62,7 @@ class JsDocTypedefParser {
     for (; !lines[i].contains("}}"); i++) {
       sb.append(stripAndReplace(lines[i + 1]));
     }
-    final String values = findValues(sb);
+    final String values = findValues(sb.toString(), TYPE_DEF_PATTERN);
     if (values.isEmpty()) {
       LOG.error("Missing typedef pattern, {} in file {}", sb.toString().trim(),
           fileName);
@@ -73,8 +73,8 @@ class JsDocTypedefParser {
     return i;
   }
 
-  private String findValues(final StringBuffer sb) {
-    final Matcher tdp = TYPE_DEF_PATTERN.matcher(sb.toString());
+  private String findValues(final String string, final Pattern pattern) {
+    final Matcher tdp = pattern.matcher(string);
     return tdp.find() ? tdp.group(1) : "";
   }
 
