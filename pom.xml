@@ -16,6 +16,7 @@
   <properties>
     <maven.version>3.2.3</maven.version>
     <mavenPluginTools>3.2</mavenPluginTools>
+    <maven.jacoco.version>0.7.4.201502262128</maven.jacoco.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
