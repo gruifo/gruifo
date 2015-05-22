@@ -1,0 +1,4 @@
+/*
+ * Single typedef interpreted as extends.
+ * @typedef {Array.<number>}
+ */ 
