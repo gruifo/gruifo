@@ -31,7 +31,7 @@
     <maven.version>3.2.3</maven.version>
     <mavenPluginTools>3.2</mavenPluginTools>
     <maven.jacoco.version>0.7.4.201502262128</maven.jacoco.version>
-    <maven.coveralls.version>2.2.0</maven.coveralls.version>
+    <maven.coveralls.version>3.1.0</maven.coveralls.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -53,6 +53,16 @@
         <version>4.11</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${maven.jacoco.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eluder.coveralls</groupId>
+        <artifactId>coveralls-maven-plugin</artifactId>
+        <version>${maven.coveralls.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -71,4 +81,35 @@
     </pluginManagement>
   </build>
 
+<profiles>
+    <profile>
+      <id>travis</id>
+      <activation>
+        <property>
+          <name>env.TRAVIS</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>prepare-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.eluder.coveralls</groupId>
+            <artifactId>coveralls-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
