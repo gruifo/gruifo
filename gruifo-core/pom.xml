@@ -1,14 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
->
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>gruifo</groupId>  
+    <groupId>gruifo</groupId>
     <artifactId>gruifo-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  
+
   <artifactId>gruifo-core</artifactId>
   <name>gruifo-core</name>
 
@@ -41,4 +40,31 @@
       <artifactId>junit</artifactId>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>travis</id>
+      <activation>
+        <property>
+          <name>env.TRAVIS</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${maven.jacoco.version}</version>
+          </plugin>
+          <plugin>
+            <groupId>org.eluder.coveralls</groupId>
+            <artifactId>coveralls-maven-plugin</artifactId>
+            <version>${maven.coveralls.version}</version>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>

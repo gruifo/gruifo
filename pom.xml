@@ -13,10 +13,25 @@
     <module>gruifo-maven-plugin</module>
   </modules>
 
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git://github.com/gruifo/gruifo.git</connection>
+    <developerConnection>scm:git:git://github.com/gruifo/gruifo.git</developerConnection>
+    <url>https://github.com/gruifo/gruifo</url>
+  </scm>
+
   <properties>
     <maven.version>3.2.3</maven.version>
     <mavenPluginTools>3.2</mavenPluginTools>
     <maven.jacoco.version>0.7.4.201502262128</maven.jacoco.version>
+    <maven.coveralls.version>2.2.0</maven.coveralls.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -56,30 +71,4 @@
     </pluginManagement>
   </build>
 
-<profiles>
-    <profile>
-      <id>travis</id>
-      <activation>
-        <property>
-          <name>env.TRAVIS</name>
-          <value>true</value>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <version>${maven.jacoco.version}</version>
-          </plugin>
-          <plugin>
-            <groupId>org.eluder.coveralls</groupId>
-            <artifactId>coveralls-maven-plugin</artifactId>
-            <version>2.2.0</version>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-  
 </project>
