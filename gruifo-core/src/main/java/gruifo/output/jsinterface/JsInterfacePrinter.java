@@ -32,6 +32,11 @@ public class JsInterfacePrinter implements FilePrinter {
     return "TODO";
   }
 
+  @Override
+  public boolean ignored(final JsFile jsFile) {
+    return false;
+  }
+
   private String printFile(final JClass jFile) {
     final StringBuffer buffer = new StringBuffer();
     buffer.append(jFile.getHeaderComment());

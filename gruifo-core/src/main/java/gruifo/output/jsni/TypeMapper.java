@@ -83,6 +83,10 @@ public final class TypeMapper {
     }
   }
 
+  public boolean ignore(final String clazz) {
+    return ignores.contains(clazz);
+  }
+
   public boolean ignore(final String clazz, final String method) {
     return ignores.contains(clazz + "$" + method);
   }

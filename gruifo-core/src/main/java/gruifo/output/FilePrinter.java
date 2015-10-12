@@ -29,4 +29,11 @@ public interface FilePrinter {
    * @return String representation of the file.
    */
   String printFile(JsFile javaFile);
+
+  /**
+   * Returns true if this file should not be ignored and thus generated.
+   * @param jsFile file to test
+   * @return true if jsFile should be generated.
+   */
+  boolean ignored(JsFile jsFile);
 }

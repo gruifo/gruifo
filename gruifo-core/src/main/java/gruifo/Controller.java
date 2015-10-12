@@ -65,7 +65,8 @@ public class Controller {
     } else if (outputType == OutputType.JSNI) {
       fp = new JSNIPrinter();
     } else {
-      throw new RuntimeException("Output type '" + outputType + "' not supported");
+      throw new RuntimeException("Output type '" + outputType
+          + "' not supported");
     }
     run(fp);
   }
@@ -89,6 +90,7 @@ public class Controller {
 
   /**
    * Scans the srcPath for JavaScript files and adds them to the files list.
+   *
    * @param files list of JavaScript files found
    * @param srcPath source path to search for files
    */
@@ -127,6 +129,7 @@ public class Controller {
   /**
    * Remove any fields specified in @typedef if the field is also specified as
    * prototype field in the JavaScript file.
+   *
    * @param files JavaScript parsed files
    * @return same list of JavaScript parsed files
    */
@@ -149,7 +152,7 @@ public class Controller {
 
   Collection<JsFile> groupFiles(final Collection<JsFile> files) {
     final Map<String, JsFile> filesMap = new HashMap<>();
-    for (final JsFile jsFile: files) {
+    for (final JsFile jsFile : files) {
       filesMap.put(jsFile.getClassOrInterfaceName(), jsFile);
     }
     final Collection<JsFile> groupedFiles = new ArrayList<>();
@@ -168,18 +171,19 @@ public class Controller {
   void writeFiles(final FilePrinter printer, final Collection<JsFile> jsFiles,
       final File outputPath) {
     for (final JsFile jsFile : jsFiles) {
-      final String packagePath = jsFile.getPackageName().replace('.', '/');
-      final File path = new File(outputPath, packagePath);
-      path.mkdirs();
-      try {
-        try (final FileWriter writer = new FileWriter(
-            new File(path, jsFile.getClassOrInterfaceName() + JAVA_EXT))) {
-          writer.append(printer.printFile(jsFile));
-          writer.flush();
+      if (!printer.ignored(jsFile)) {
+        final String packagePath = jsFile.getPackageName().replace('.', '/');
+        final File path = new File(outputPath, packagePath);
+        path.mkdirs();
+        try {
+          try (final FileWriter writer = new FileWriter(new File(path,
+              jsFile.getClassOrInterfaceName() + JAVA_EXT))) {
+            writer.append(printer.printFile(jsFile));
+            writer.flush();
+          }
+        } catch (final IOException e) {
+          LOG.error("Exception parsing file:" + jsFile.getOriginalFileName(), e);
         }
-      } catch (final IOException e) {
-        LOG.error("Exception parsing file:"
-            + jsFile.getOriginalFileName(), e);
       }
     }
   }

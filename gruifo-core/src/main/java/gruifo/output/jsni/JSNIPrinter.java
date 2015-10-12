@@ -43,6 +43,12 @@ public class JSNIPrinter implements FilePrinter {
     return printFile(transformer.transform(jsFile));
   }
 
+  @Override
+  public boolean ignored(final JsFile jsFile) {
+    return TypeMapper.INSTANCE.ignore(
+        jsFile.getPackageName() + '.' + jsFile.getClassOrInterfaceName());
+  }
+
   public String printFile(final JClass jFile) {
     final int indent = 0;
     final StringBuffer buffer = new StringBuffer();
