@@ -150,6 +150,7 @@ class Transformer {
     return ignoreMethods.contains(jsMethod.getMethodName())
         || jsMethod.getElement().isOverride()
         || jsMethod.getElement().isPrivate()
+        || jsMethod.getElement().isProtected()
         || TYPE_MAPPER.ignore(clazz, jsMethod.getMethodName())
         || "clone".equals(jsMethod.getMethodName()); // FIXME clone
   }
