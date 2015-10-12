@@ -137,11 +137,15 @@ public class JSNIPrinter implements FilePrinter {
 
   private void printConstructors(final int indent, final StringBuffer buffer,
       final JClass jFile) {
-    for (final JMethod constructor : jFile.getConstructors()) {
-      if (jFile.isDataClass()) {
-        printConstructorsDataClass(indent, buffer, jFile);
-      } else {
-        printConstructorCreator(indent, buffer, jFile, constructor);
+    // if class is abstract don't create constructors because the class can't
+    // be used directly.
+    if (!jFile.hasAbstractMethods()) {
+      for (final JMethod constructor : jFile.getConstructors()) {
+        if (jFile.isDataClass()) {
+          printConstructorsDataClass(indent, buffer, jFile);
+        } else {
+          printConstructorCreator(indent, buffer, jFile, constructor);
+        }
       }
     }
     if (!jFile.isDataClass()) {

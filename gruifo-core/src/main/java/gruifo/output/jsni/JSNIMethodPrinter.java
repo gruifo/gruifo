@@ -29,12 +29,15 @@ class JSNIMethodPrinter {
   public void printMethods(final StringBuffer buffer, final int indent,
       final JClass jFile) {
     for (final JMethod method : jFile.getMethods()) {
+      if (method.isAbstractMethod()) {
+        continue;
+      }
       //TODO print method with multi arguments a|b
       PrintUtil.indent(buffer, method.getJsDoc(), indent);
       PrintUtil.indent(buffer, indent);
       buffer.append(appendAccessType(method.getAccessType()));
       if (method.isAbstractMethod()) {
-        buffer.append(" /* abstract */ ");
+        buffer.append("abstract ");
       } else {
         buffer.append("final native ");
       }
@@ -52,25 +55,7 @@ class JSNIMethodPrinter {
       printMethodParam(buffer, method, true);
       buffer.append(')');
       if (method.isAbstractMethod()) {
-        // FIXME instead of making it a real abstract method return dummy
-        // Problem is some implementing methods use @inheritsDoc annotation
-        // and then they are ignored resulting in invalid files when the method
-        // in the super class is generated as abstract method. However if all
-        // abstract methods would be generated as normal methods some classes
-        // do implement the override as normal methods without the @inheritsDoc
-        // annotation and then these methods would be in error because the
-        // parent method is final.
-        buffer.append(" {");
-        if (!isVoidType(method)) {
-          buffer.append(" return ");
-          if (TypeMapper.INSTANCE.isPrimitive(method.getReturn())) {
-            //FIXME return correct dummy value, for booleans this is not working.
-            buffer.append("0;");
-          } else {
-            buffer.append("null;");
-          }
-        }
-        buffer.append("}");
+        buffer.append(';');
       } else {
         buffer.append(" /*-{");
         PrintUtil.nl(buffer);
