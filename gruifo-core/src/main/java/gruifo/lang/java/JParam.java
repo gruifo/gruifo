@@ -22,6 +22,8 @@ public class JParam {
   private boolean optional;
   private boolean multiField;
   private boolean varargs;
+  private boolean _static;
+  private boolean _final;
   private String javaDoc;
 
   public JParam(final String name, final String type) {
@@ -41,6 +43,10 @@ public class JParam {
     return type;
   }
 
+  public boolean isFinal() {
+    return _final;
+  }
+
   public boolean isMultiField() {
     return multiField;
   }
@@ -49,8 +55,16 @@ public class JParam {
     return optional;
   }
 
+  public boolean isStatic() {
+    return _static;
+  }
+
   public boolean isVarargs() {
     return varargs;
+  }
+
+  public void setFinal(final boolean _final) {
+    this._final = _final;
   }
 
   public void setJavaDoc(final String javaDoc) {
@@ -67,6 +81,10 @@ public class JParam {
 
   public void setOptional(final boolean optional) {
     this.optional = optional;
+  }
+
+  public void setStatic(final boolean _static) {
+    this._static = _static;
   }
 
   public void setType(final String type) {

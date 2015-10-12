@@ -23,7 +23,6 @@ import java.util.List;
 public class JsFile {
 
   private final List<JsEnum> enumValues = new ArrayList<>();
-  private final List<JsConst> constants = new ArrayList<>();
   private final List<JsParam> fields = new ArrayList<>();
   private final List<JsMethod> methods = new ArrayList<>();
   private final List<JsFile> innerJsFiles = new ArrayList<>();
@@ -45,10 +44,6 @@ public class JsFile {
     return orginalFileName;
   }
 
-  public void addConst(final String constName, final JsElement element) {
-    constants.add(new JsConst(constName, element));
-  }
-
   public void addEnumValue(final String name, final String jsDoc) {
     enumValues.add(new JsEnum(name, jsDoc));
   }
@@ -67,10 +62,6 @@ public class JsFile {
 
   public String getClassOrInterfaceName() {
     return classOrInteraceName;
-  }
-
-  public List<JsConst> getConstants() {
-    return constants;
   }
 
   public JsElement getElement() {

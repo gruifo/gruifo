@@ -140,6 +140,8 @@ class Transformer {
           field.setMultiField(types.size() > 1);
           if (jsParam.getElement() != null) {
             field.setJavaDoc(jsParam.getElement().getJsDoc());
+            field.setStatic(jsParam.getElement().isConst());
+            field.setFinal(jsParam.getElement().isDefine());
           }
         }
       }
@@ -310,7 +312,7 @@ class Transformer {
       if (jsType.getChoices().isEmpty()) {
         final String transformedType = transformType(jsType, true);
         if (transformedType == null) {
-          LOG.error("Type for single type conversion empty: {}", jsType);
+          LOG.error("Type for single type conversion empty:{}", jsType);
           type = TypeMapper.GWT_JAVA_SCRIPT_OBJECT;
         } else {
           type = transformedType;

@@ -16,9 +16,9 @@
 package gruifo.parser;
 
 import static org.junit.Assert.assertEquals;
+import gruifo.lang.js.JsElement;
 import gruifo.lang.js.JsFile;
 import gruifo.lang.js.JsMethod;
-import gruifo.parser.JavaScriptFileParser;
 
 import org.junit.Test;
 
@@ -31,7 +31,8 @@ public class JavaScriptFileParserTest {
   public void testParseClassName() {
     final JavaScriptFileParser parser = new JavaScriptFileParser("");
     final JsFile jFile =
-        parser.parseClassOrInterfaceName("this.is.a.Class", false);
+        parser.parseClassOrInterfaceName("this.is.a.Class", false,
+            new JsElement());
     assertEquals("Package name", "this.is.a", jFile.getPackageName());
     assertEquals("Class name", "Class", jFile.getClassOrInterfaceName());
   }

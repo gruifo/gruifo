@@ -20,11 +20,7 @@ import gruifo.lang.AccessType;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class JsElement {
-  private static final Logger LOG = LoggerFactory.getLogger(JsElement.class);
 
   public static enum ElementType {
     CLASS,
@@ -77,7 +73,7 @@ public class JsElement {
   }
 
   private AccessType accessType = AccessType.PUBLIC;
-  private ElementType elementType;
+  private ElementType elementType = ElementType.METHOD;
   private boolean classDesc;
   private String jsDoc;
   private JsType extendsType;
@@ -249,18 +245,17 @@ public class JsElement {
   }
 
   public void setTypeDef(final List<JsParam> typeDef) {
+    elementType = ElementType.TYPEDEF;
     this.typeDef = typeDef;
-    if (elementType != null) {
-      LOG.error("ElementType already set: {}", elementType);
-    }
   }
+
   @Override
   public String toString() {
     return "JsElement [accessType=" + accessType + ", elementType="
-        + elementType + ", classDesc=" + classDesc + ", comment=" + jsDoc
-        + ", _extends=" + extendsType + ", params=" + params + ", typeDef="
-        + typeDef + ", type=" + type + ", _return=" + returnType + ", override="
+        + elementType + ", classDesc=" + classDesc + ", _extends="
+        + extendsType + ", params=" + params + ", typeDef=" + typeDef
+        + ", type=" + type + ", _return=" + returnType + ", override="
         + override + ", genericType=" + genericType + ", define=" + define
-        + "]";
+        + ", comment=" + jsDoc + "]";
   }
 }

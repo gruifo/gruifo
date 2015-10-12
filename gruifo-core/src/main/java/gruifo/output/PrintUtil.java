@@ -58,7 +58,6 @@ public final class PrintUtil {
 
   public static String firstCharUpper(final String string) {
     return string == null ? null :
-      String.valueOf(string.charAt(0)).toUpperCase()
-      + string.substring(1);
+      String.valueOf(string.charAt(0)).toUpperCase() + string.substring(1);
   }
 }

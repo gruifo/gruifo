@@ -38,6 +38,7 @@ public class JSNIPrinter implements FilePrinter {
   private final JSNIFieldPrinter fPrinter = new JSNIFieldPrinter();
   private final JSNIEnumPrinter ePrinter = new JSNIEnumPrinter();
 
+
   @Override
   public String printFile(final JsFile jsFile) {
     return printFile(transformer.transform(jsFile));

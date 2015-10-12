@@ -24,6 +24,7 @@ import gruifo.output.PrintUtil;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,6 +52,7 @@ public class JavaScriptFileParser implements NodeVisitor {
   private static final Pattern PROTOTYPE_PATTERN =
       Pattern.compile("((.+)\\.([^\\.]+))\\." + PROTOTYPE + "\\.(.+)");
   private final Map<String, JsFile> files = new HashMap<>();
+  private final Map<String, JsElement> consts = new HashMap<>();
   private final JavaScriptDocParser parser = new JavaScriptDocParser();
 
   private final String fileName;
@@ -64,15 +66,11 @@ public class JavaScriptFileParser implements NodeVisitor {
     if (node.getType() == Token.ASSIGN) {
       visitAssignment((Assignment) node);
     } else if (node.getType() == Token.CONST) {
-      LOG.error("FIXME: Const node detected, not parsed");
+      LOG.error("FIXME: Const node detected, not parsed in file:{}" , fileName);
     } else {
       checkAndAddTypedef(node);
     }
     return true;
-  }
-
-  public Collection<JsFile> getFiles() {
-    return files.values();
   }
 
   private void visitAssignment(final Assignment node) {
@@ -86,29 +84,28 @@ public class JavaScriptFileParser implements NodeVisitor {
           visitMethodOrClass(((PropertyGet) node.getLeft()).toSource(),
               node.getJsDoc(), (FunctionNode) node.getRight());
         } catch (final ClassCastException e) {
-          LOG.error("Node different then file:{},", fileName, e);
+          LOG.error("Node different then expcected in file:{},", fileName, e);
         }
       } else {
-        LOG.debug("Node at linenr {} ignored: {}", node.getLineno(), fileName);
+        LOG.debug("Node at linenr {} ignored in file:{}",
+            node.getLineno(), fileName);
       }
     } else if (node.getParent() instanceof ExpressionStatement
         && node.getLeft() instanceof PropertyGet
         && isRootNode(node.getParent())) {
-      visitEnum(((PropertyGet) node.getLeft()).toSource(), node.getJsDoc(),
-          node.getRight());
-      // TODO functions calling other functions.
-      // LOG.debug("Node found: {} in file: {}", ((PropertyGet)
-      // node.getLeft()).toSource(), fileName);
+      visitMethodOrEnum(((PropertyGet) node.getLeft()).toSource(),
+          node.getJsDoc(), node.getRight());
     }
   }
 
   private boolean isRootNode(final AstNode parent) {
     return !(parent.getParent() instanceof Block
         || (parent.getParent() instanceof Scope
-            && ((Scope) (parent.getParent())).getParentScope() instanceof FunctionNode));
+            && ((Scope) (parent.getParent())).getParentScope()
+            instanceof FunctionNode));
   }
 
-  private void visitEnum(final String enumName, final String jsDoc,
+  private void visitMethodOrEnum(final String enumName, final String jsDoc,
       final AstNode astNode) {
     if (jsDoc == null) {
       //TODO sometimes values are recognized as enums even if they are not.
@@ -120,8 +117,7 @@ public class JavaScriptFileParser implements NodeVisitor {
       return; // ignore private stuff...
     }
     if (element.isEnum()) {
-      final JsFile jsFile = parseClassOrInterfaceName(enumName, false);
-      jsFile.setElement(element);
+      final JsFile jsFile = parseClassOrInterfaceName(enumName, false, element);
 
       files.put(enumName, jsFile);
       if (astNode instanceof ObjectLiteral) {
@@ -130,26 +126,28 @@ public class JavaScriptFileParser implements NodeVisitor {
           final Name left = (Name) op.getLeft();
           jsFile.addEnumValue(left.toSource(), left.getJsDoc());
         }
-        // LOG.warn("Yes this is a ArrayLiteral: {} in file: {}", enumName,
-        // fileName);
       }
-    } else if (isPrototype(enumName)) {
-      addMethod(enumName, element, false).setAbstract(true);
-    } else if (element.isConst()){
-      LOG.error("Const element '{}' not parsed in: {}", enumName, fileName);
-      //FIXME if const added before class itself file is created twice.
-      // also const element not at toplevel because it's a field not toplevel.
-      //addConst(enumName, element);
+    } else if (isMethod(enumName, element)) {
+      //method assigned as method variable.
+      final JsMethod method = addMethod(enumName, element, false);
+      if (method == null) {
+        LOG.warn("Should this be abstract: {} in file:{}", enumName, fileName);
+      } else {
+        method.setAbstract(true);
+      }
+    } else if (element.isConst() || element.isDefine()){
+      consts.put(enumName, element);
     } else {
-      LOG.warn("We missed something: {} in file: {}", enumName, fileName);
+      LOG.warn("We missed something: {}: {} in file:{}", enumName, element,
+          fileName);
     }
   }
 
   private void visitMethodOrClass(final String methodOrClassName,
       final String jsDoc, final FunctionNode right) {
     if (jsDoc == null) {
-      LOG.error("Comment in for {} file {} is empty.",
-          methodOrClassName, fileName);
+      LOG.error("Comment in for {} is empty in file:{}", methodOrClassName,
+          fileName);
       return;
     }
     final JsElement element = parser.parse(fileName, jsDoc);
@@ -158,16 +156,14 @@ public class JavaScriptFileParser implements NodeVisitor {
     }
     if (element.isClass() || element.isInterface() || element.isEnum()) {
       if (files.containsKey(methodOrClassName)) {
-        LOG.warn("Class twice in javascript file? class: {}",
-            methodOrClassName);
+        LOG.warn("Class twice in javascript file? class: {} in file:{}",
+            methodOrClassName, fileName);
       }
       final JsFile jFile = parseClassOrInterfaceName(methodOrClassName,
-          element.isInterface());
-
-      jFile.setElement(element);
+          element.isInterface(), element);
       files.put(methodOrClassName, jFile);
       addMethodOrField(methodOrClassName, element, true);
-    } else if (isPrototype(methodOrClassName)) {
+    } else if (isMethod(methodOrClassName, element)) {
       addMethodOrField(methodOrClassName, element, false);
     }
   }
@@ -188,7 +184,7 @@ public class JavaScriptFileParser implements NodeVisitor {
       method.setElement(element);
       final JsFile jsFile = files.get(method.getPackageName());
       if (jsFile == null) {
-        LOG.warn("class not in file for: {}", method.getPackageName());
+        LOG.warn("Class {} not in file:{}", method.getPackageName(), fileName);
       } else {
         jsFile.addMethod(method);
       }
@@ -199,45 +195,29 @@ public class JavaScriptFileParser implements NodeVisitor {
   private void addAsField(final String name, final JsElement element) {
     final Matcher nameMatcher = PROTOTYPE_PATTERN.matcher(name);
     if (nameMatcher.find()) {
-      final String packageName =
-          nameMatcher.group(1);// + "." + nameMatcher.group(2);
+      final String packageName = nameMatcher.group(1);
       final String fieldName = nameMatcher.group(4);
       final JsParam field = new JsParam(fieldName, element);
       final JsFile jsFile = files.get(packageName);
       if (jsFile == null) {
-        LOG.warn("Class not in file for package name:{}, from name:{}"
-            , packageName, name);
+        LOG.warn("Class for package name:{}, from name:{} not in file:{}"
+            , packageName, name, fileName);
       } else {
         jsFile.addField(field);
       }
     } else {
-      LOG.warn("Field didn't match prototype pattern: {}", name);
+      LOG.warn("Field didn't match prototype pattern: {} in file:{}",
+          name, fileName);
     }
   }
 
-  //FIXME fix Const parseing
-  private void addConst(final String constName, final JsElement element) {
-    final String packageName =
-        constName.substring(0, constName.lastIndexOf('.'));
-    final int packLastIdx = packageName.lastIndexOf('.');
-    final String className = PrintUtil.firstCharUpper(
-        packLastIdx == -1 ? constName : packageName.substring(packLastIdx + 1));
-    final JsFile jsFile;
-    if (files.containsKey(className)) {
-      jsFile = files.get(className);
-    } else {
-      jsFile = new JsFile(fileName, packageName, className, false);
-      jsFile.setElement(element);
-      files.put(className, jsFile);
-    }
-    jsFile.addConst(constName, element);
-  }
-
-
-  JsFile parseClassOrInterfaceName(final String name, final boolean _interface) {
+  JsFile parseClassOrInterfaceName(final String name, final boolean interfce,
+      final JsElement element) {
     final int classNameIdx = name.lastIndexOf('.');
-    return new JsFile(fileName, name.substring(0, classNameIdx),
-        name.substring(classNameIdx + 1), _interface);
+    final JsFile jsFile = new JsFile(fileName, name.substring(0, classNameIdx),
+        name.substring(classNameIdx + 1), interfce);
+    jsFile.setElement(element);
+    return jsFile;
   }
 
   JsMethod parseMethod(final String name, final boolean constructor) {
@@ -257,13 +237,14 @@ public class JavaScriptFileParser implements NodeVisitor {
       final String methodName = nameMatcher.group(4);
       return new JsMethod(packageName, methodName);
     } else {
-      LOG.warn("Field didn't match prototype pattern: {}", name);
+      LOG.warn("Field didn't match prototype pattern: {} in file:{}",
+          name, fileName);
       return null;
     }
   }
 
-  private boolean isPrototype(final String functionName) {
-    return functionName.indexOf(PROTOTYPE) > 0;
+  private boolean isMethod(final String functionName, final JsElement element) {
+    return functionName.indexOf(PROTOTYPE) > 0 || element.isMethod();
   }
 
   private void checkAndAddTypedef(final AstNode node) {
@@ -271,21 +252,72 @@ public class JavaScriptFileParser implements NodeVisitor {
         && node.getParent() instanceof ExpressionStatement
         && node.getParent().getParent() instanceof AstRoot) {
       if (node.getJsDoc() == null) {
-        LOG.error("Node {} has empty comment: {}", node.toSource(), fileName);
+        LOG.error("Node {} has empty comment in file:{}",
+            node.toSource(), fileName);
         return;
       }
       final JsElement element = parser.parse(fileName, node.getJsDoc());
       final String typedef = node.toSource();
-      if (isPrototype(typedef)) {
+      if (isMethod(typedef, element)) {
         addMethodOrField(typedef, element, false);
       } else if (element.getType() == null) {
         final JsFile jFile = parseClassOrInterfaceName(typedef,
-            element.isInterface());
-        jFile.setElement(element);
+            element.isInterface(), element);
         files.put(typedef, jFile);
       } else {
-        LOG.error("Type '{}' ignored: {}", typedef, fileName);
+        LOG.error("Type '{}' ignored in file:{}", typedef, fileName);
       }
     }
+  }
+
+
+  public Collection<JsFile> getFiles() {
+    collectConsts();
+    return files.values();
+  }
+
+  private void collectConsts() {
+    for (final Entry<String, JsElement> cnst: consts.entrySet()) {
+      addConst(cnst.getKey(), cnst.getValue());
+    }
+    consts.clear();
+  }
+
+  private void addConst(final String constName, final JsElement element) {
+    final String fullClassName =
+        constName.substring(0, constName.lastIndexOf('.'));
+    if (files.containsKey(fullClassName)) {
+      final JsFile jsFile = files.get(fullClassName);
+      jsFile.addField(new JsParam(constName, element));
+    } else {
+      final String fullConstName = getFullConstName(fullClassName);
+      if (fullConstName.isEmpty()) {
+        LOG.error("Couldn't find class for {} in file:{}", fullClassName,
+            fileName);
+      } else {
+        final JsFile cjsFile;
+        if (files.containsKey(fullConstName)) {
+          cjsFile = files.get(fullConstName);
+        } else {
+          final JsElement jsfElement = new JsElement();
+          cjsFile = parseClassOrInterfaceName(fullConstName, false, jsfElement);
+          files.put(fullConstName, cjsFile);
+        }
+        cjsFile.addField(new JsParam(constName, element));
+      }
+    }
+  }
+
+  private String getFullConstName(final String fullClassName) {
+    final int classSep = fullClassName.lastIndexOf('.');
+    final String fullConstName;
+    if (classSep > 0) {
+      final String newClassName = PrintUtil.firstCharUpper(
+          fullClassName.substring(classSep + 1)) + "Constants";
+      fullConstName = fullClassName.substring(0, classSep) + '.' + newClassName;
+    } else {
+      fullConstName = "";
+    }
+    return fullConstName;
   }
 }

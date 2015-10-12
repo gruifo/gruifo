@@ -28,7 +28,9 @@ public class JSNIFieldPrinter {
       final JClass jFile) {
     for (final JParam field : jFile.getFields()) {
       printGetter(buffer, indent, field);
-      printSetter(buffer, indent, field);
+      if (!field.isFinal()) {
+        printSetter(buffer, indent, field);
+      }
     }
   }
 
@@ -36,19 +38,23 @@ public class JSNIFieldPrinter {
       final JParam field) {
     PrintUtil.indent(buffer, field.getJavaDoc(), indent);
     PrintUtil.indent(buffer, indent);
-    buffer.append("public final native ");
+    buffer.append("public ");
+    if (field.isStatic()) {
+      buffer.append("static ");
+    }
+    buffer.append("final native ");
     buffer.append(field.getType());
     buffer.append(" get");
-    buffer.append(PrintUtil.firstCharUpper(field.getName()));
+    printFieldName(buffer, field);
     if (field.isMultiField()) {
       buffer.append(fixMultiTypeField(field));
     }
     buffer.append("() /*-{");
     PrintUtil.nl(buffer);
     PrintUtil.indent(buffer, indent + 1);
-    buffer.append("return this['");
-    buffer.append(field.getName());
-    buffer.append("'];");
+    buffer.append("return ");
+    printFieldVariable(buffer, field);
+    buffer.append(';');
     PrintUtil.nl(buffer);
     PrintUtil.indent(buffer, indent);
     buffer.append("}-*/;");
@@ -68,24 +74,49 @@ public class JSNIFieldPrinter {
       final JParam field) {
     PrintUtil.indent(buffer, field.getJavaDoc(), indent);
     PrintUtil.indent(buffer, indent);
-    buffer.append("public final native void");
+    buffer.append("public ");
+    if (field.isStatic()) {
+      buffer.append("static ");
+    }
+    buffer.append("final native void");
     buffer.append(" set");
-    buffer.append(PrintUtil.firstCharUpper(field.getName()));
+    printFieldName(buffer, field);
     buffer.append('(');
     buffer.append(field.getType());
     buffer.append(' ');
-    buffer.append(field.getName());
+    printFieldName(buffer, field);
     buffer.append(") /*-{");
     PrintUtil.nl(buffer);
     PrintUtil.indent(buffer, indent + 1);
-    buffer.append("this['");
-    buffer.append(field.getName());
-    buffer.append("'] = ");
-    buffer.append(field.getName());
+    printFieldVariable(buffer, field);
+    buffer.append(" = ");
+    printFieldName(buffer, field);
     buffer.append(';');
     PrintUtil.nl(buffer);
     PrintUtil.indent(buffer, indent);
     buffer.append("}-*/;");
     PrintUtil.nl2(buffer);
   }
+
+  private void printFieldName(final StringBuffer buffer, final JParam field) {
+    final String name = field.getName();
+    if (field.isStatic()) {
+      final int classSep = name.lastIndexOf('.');
+      buffer.append(name.substring(classSep + 1));
+    } else {
+      buffer.append(PrintUtil.firstCharUpper(name));
+    }
+  }
+
+  private void printFieldVariable(final StringBuffer buffer, final JParam field) {
+    if (field.isStatic()) {
+      buffer.append("$wnd.");
+      buffer.append(field.getName());
+    } else {
+      buffer.append("this['");
+      buffer.append(field.getName());
+      buffer.append("']");
+    }
+  }
+
 }
