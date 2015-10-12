@@ -33,45 +33,6 @@ public class JsElement {
     TYPEDEF;
   }
 
-  public static class JsParam {
-    private JsType type;
-    private String name;
-    private JsElement element;
-
-    public JsParam() {
-    }
-
-    public JsParam(final String name, final JsElement element) {
-      this.name = name;
-      this.element = element;
-    }
-
-    public JsElement getElement() {
-      return element;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public JsType getType() {
-      return element == null ? type : element.getType();
-    }
-
-    public void setName(final String name) {
-      this.name = name;
-    }
-
-    public void setType(final JsType jsType) {
-      this.type = jsType;
-    }
-
-    @Override
-    public String toString() {
-      return "JsParam [name=" + name + ", type=" + type + "]";
-    }
-  }
-
   private AccessType accessType = AccessType.PUBLIC;
   private ElementType elementType = ElementType.METHOD;
   private boolean classDesc;

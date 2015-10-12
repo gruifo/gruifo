@@ -15,26 +15,41 @@
  */
 package gruifo.lang.js;
 
-public class JsEnum {
+public class JsParam {
+  private JsType type;
+  private String name;
+  private JsElement element;
 
-  private final String fieldName;
-  private final String jsDoc;
-
-  public JsEnum(final String name, final String jsDoc) {
-    fieldName = name;
-    this.jsDoc = jsDoc;
+  public JsParam() {
   }
 
-  public String getFieldName() {
-    return fieldName;
+  public JsParam(final String name, final JsElement element) {
+    this.name = name;
+    this.element = element;
   }
 
-  public String getJsDoc() {
-    return jsDoc;
+  public JsElement getElement() {
+    return element;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public JsType getType() {
+    return element == null ? type : element.getType();
+  }
+
+  public void setName(final String name) {
+    this.name = name;
+  }
+
+  public void setType(final JsType jsType) {
+    this.type = jsType;
   }
 
   @Override
   public String toString() {
-    return "JsEnum [fieldName=" + fieldName + ", jsDoc=" + jsDoc + "]";
+    return "JsParam [name=" + name + ", type=" + type + "]";
   }
 }

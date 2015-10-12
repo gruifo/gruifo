@@ -16,9 +16,9 @@
 package gruifo.parser;
 
 import gruifo.lang.js.JsElement;
-import gruifo.lang.js.JsElement.JsParam;
 import gruifo.lang.js.JsFile;
 import gruifo.lang.js.JsMethod;
+import gruifo.lang.js.JsParam;
 import gruifo.output.PrintUtil;
 
 import java.util.Collection;

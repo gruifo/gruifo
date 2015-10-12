@@ -18,10 +18,10 @@ package gruifo.output.jsni;
 import gruifo.lang.java.JClass;
 import gruifo.lang.java.JMethod;
 import gruifo.lang.java.JParam;
-import gruifo.lang.js.JsElement.JsParam;
 import gruifo.lang.js.JsEnum;
 import gruifo.lang.js.JsFile;
 import gruifo.lang.js.JsMethod;
+import gruifo.lang.js.JsParam;
 import gruifo.lang.js.JsType;
 
 import java.util.ArrayList;

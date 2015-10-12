@@ -15,8 +15,8 @@
  */
 package gruifo;
 
-import gruifo.lang.js.JsElement.JsParam;
 import gruifo.lang.js.JsFile;
+import gruifo.lang.js.JsParam;
 import gruifo.output.FilePrinter;
 import gruifo.output.jsinterface.JsInterfacePrinter;
 import gruifo.output.jsni.JSNIPrinter;

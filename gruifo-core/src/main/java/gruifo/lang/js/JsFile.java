@@ -15,8 +15,6 @@
  */
 package gruifo.lang.js;
 
-import gruifo.lang.js.JsElement.JsParam;
-
 import java.util.ArrayList;
 import java.util.List;
 

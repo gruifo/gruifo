@@ -18,10 +18,8 @@ package gruifo.lang.java;
 public class JParam {
 
   private String type;
-  private String name;
-  private boolean optional;
+  private final String name;
   private boolean multiField;
-  private boolean varargs;
   private boolean _static;
   private boolean _final;
   private String javaDoc;
@@ -51,16 +49,8 @@ public class JParam {
     return multiField;
   }
 
-  public boolean isOptional() {
-    return optional;
-  }
-
   public boolean isStatic() {
     return _static;
-  }
-
-  public boolean isVarargs() {
-    return varargs;
   }
 
   public void setFinal(final boolean _final) {
@@ -73,14 +63,6 @@ public class JParam {
 
   public void setMultiField(final boolean multiField) {
     this.multiField = multiField;
-  }
-
-  public void setName(final String name) {
-    this.name = name;
-  }
-
-  public void setOptional(final boolean optional) {
-    this.optional = optional;
   }
 
   public void setStatic(final boolean _static) {
