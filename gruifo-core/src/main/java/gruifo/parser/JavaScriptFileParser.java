@@ -205,7 +205,8 @@ public class JavaScriptFileParser implements NodeVisitor {
       final JsParam field = new JsParam(fieldName, element);
       final JsFile jsFile = files.get(packageName);
       if (jsFile == null) {
-        LOG.warn("Class not in file for: {}", packageName);
+        LOG.warn("Class not in file for package name:{}, from name:{}"
+            , packageName, name);
       } else {
         jsFile.addField(field);
       }
