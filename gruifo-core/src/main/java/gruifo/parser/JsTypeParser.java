@@ -29,7 +29,7 @@ public class JsTypeParser {
   private static final String FUNCTION = "function(";
 
   public JsType parseType(final String rawType) {
-    return typeParser(stripParentheses(rawType));
+    return typeParser(replaceRawType(stripParentheses(rawType)));
   }
 
   private String stripParentheses(final String type) {
@@ -43,6 +43,12 @@ public class JsTypeParser {
       strippedType = type.substring(beginIndex, endIndex);
     }
     return strippedType;
+  }
+
+  private String replaceRawType(final String rawType) {
+    //FIXME don't hardcode ol.proj.ProjectionLike, but read from configuration
+    return rawType.replace("ol.proj.ProjectionLike",
+        "ol.proj.Projection|string|undefined");
   }
 
   private JsType typeParser(final String rawType) {
