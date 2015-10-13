@@ -37,12 +37,14 @@ nl.test.SomeClass.prototype.setSomeFunction3 = function(first, second, third) {
 };
 
 /**
- * Method with 2 variable parameters.
+ * Method with 4 variable parameters.
  * @param {number|string} first first parameter.
  * @param {number|string} second second parameter.
+ * @param {int} third third parameter.
+ * @param {number|string} fourth fourth parameter.
  */
-nl.test.SomeClass.prototype.setSomeFunction2Double = function(first, second) {
-  this.set(first, second);
+nl.test.SomeClass.prototype.setSomeFunction2Double = function(first, second, third, fourth) {
+  this.set(first, second, third, fourth);
 };
 
 /**

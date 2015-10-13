@@ -179,39 +179,68 @@ class Transformer {
   }
 
   /**
-   * Creates multiple parameters lists if a parameter type contains multiple types.
+   * Creates multiple parameters lists if a parameter type contains multiple
+   * types.
    * @param jsParams
    * @return
    */
-  private List<List<JParam>> split2MethodParamsMulti(final List<JsParam> jsParams) {
+  private List<List<JParam>> split2MethodParamsMulti(
+      final List<JsParam> jsParams) {
     final List<List<JParam>> params = new ArrayList<>();
     params.add(new ArrayList<JParam>());
     for (int i = 0; i < jsParams.size(); i++) {
       final JsParam jsParam = jsParams.get(i);
       if (jsParam.getType().getChoices().size() > 1) {
-        final List<JParam> splitParams = optionParam2List(jsParam);
-        final int currentSize = params.size();
-        for (int k = 1; k < splitParams.size(); k++) {
-          for (int j = 0; j < currentSize; j++) {
-            params.add(new ArrayList<>(params.get(j)));
-          }
-        }
-        for (int j = 0; j < params.size();) {
-          for (final JParam jParam : splitParams) {
-            params.get(j).add(jParam);
-            j++;
-          }
-        }
+        expandChoices(params, jsParam);
       } else {
-        for (final String type: transformType(jsParam.getType())) {
-          final JParam jParam = new JParam(jsParam.getName(), type);
-          for (final List<JParam> list : params) {
-            list.add(jParam);
-          }
-        }
+        addSingleParam(params, jsParam);
       }
     }
     return params;
+  }
+
+  /**
+   * Add new lists for each choice.
+   * The lists are alternating replicated and then sequential added:
+   * <pre>
+   *   A => A C
+   *   B    B C
+   *        A D
+   *        B D
+   * </pre>
+   * @param params List of combinations of List of parameters.
+   * @param jsParam choice parameters to add.
+   */
+  private void expandChoices(final List<List<JParam>> params,
+      final JsParam jsParam) {
+    final List<JParam> splitParams = optionParam2List(jsParam);
+    final int currentSize = params.size();
+    // Add new lists matching the number of choices.
+    for (int j = 0; j < currentSize; j++) {
+      for (int k = 1; k < splitParams.size(); k++) {
+        params.add(new ArrayList<>(params.get(j)));
+      }
+    }
+    for (int j = 0; j < splitParams.size();j++) {
+      for (int k = 0; k < currentSize; k++) {
+        params.get(k + (j * currentSize)).add(splitParams.get(j));
+      }
+    }
+  }
+
+  /**
+   * Add the given jsParam to each list in params.
+   * @param params List of combinations of List of parameters.
+   * @param jsParam parameter to add.
+   */
+  private void addSingleParam(final List<List<JParam>> params,
+      final JsParam jsParam) {
+    for (final String type: transformType(jsParam.getType())) {
+      final JParam jParam = new JParam(jsParam.getName(), type);
+      for (final List<JParam> list : params) {
+        list.add(jParam);
+      }
+    }
   }
 
   public List<JParam> optionParam2List(final JsParam jsParam) {
