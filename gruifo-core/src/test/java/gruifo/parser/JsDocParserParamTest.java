@@ -33,7 +33,7 @@ public class JsDocParserParamTest extends JsDocParserTestBase {
 
   @Test
   public void testParam() {
-    assertEquals("params size", 16, jsElement.getParams().size());
+    assertEquals("params size", 17, jsElement.getParams().size());
     assertEquals("params 0 name",
         "options", jsElement.getParams().get(0).getName());
     assertEquals("params 0 type", "nl.Options",
@@ -58,6 +58,12 @@ public class JsDocParserParamTest extends JsDocParserTestBase {
         jsElement.getParams().get(8).getType().isVarArgs());
     assertEquals("Name should be without dots", "nl.Varargs",
         jsElement.getParams().get(8).getType().getName());
+  }
+
+  @Test
+  public void test2LineParam() {
+    assertEquals("params size next line not found", 3,
+        jsElement.getParams().get(16).getType().getChoices().size());
   }
 
   @Test

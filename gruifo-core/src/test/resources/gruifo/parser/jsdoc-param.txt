@@ -16,5 +16,7 @@
  * @param {?} anyNull any type, no type checking
  * @param {Object.<string, *>} string_objects
  * @param {Object.<string, string|number>} params parameters.
+ * @param {nl.some.One|Array.<nl.some.One>|nl.some.Two|undefined}
+ *    nextLine param on next Line
  * @return {Array.<number>} Resolutions.
  */

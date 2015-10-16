@@ -144,12 +144,23 @@ public class JavaScriptDocParser {
    * Annotation: @this
    */
   private static final String THIS = "this";
+  /**
+   * Annotation: @todo
+   */
   private static final String TODO = "todo";
+  /**
+   * Annotation: @type
+   */
   private static final String TYPE = "type";
+  /**
+   * Annotation: @typedef
+   */
   private static final String TYPEDEF = "typedef";
 
   private static final Pattern ANNOTATION_PATTERN =
       Pattern.compile("@([^ ]+) ?.*");
+  private static final Pattern COMMENT_PATTERN =
+      Pattern.compile("^ *[^ ]+ (.*)");
 
   private final JsTypeParser jsTypeParser = new JsTypeParser();
   private final JsDocTypedefParser typedefParser =
@@ -203,10 +214,7 @@ public class JavaScriptDocParser {
         doc.setInterface();
         break;
       case PARAM:
-        final JsParam param = parseParam(line, fileName);
-        if (param != null) {
-          doc.getParams().add(param);
-        }
+        parseParam(fileName, doc, lines, i, line);
         break;
       case PRIVATE:
         doc.setPrivate();
@@ -260,6 +268,36 @@ public class JavaScriptDocParser {
     return matcher.find() ? matcher.group(1) : "";
   }
 
+  private void parseParam(final String fileName, final JsElement doc,
+      final String[] lines, final int i, final String line) {
+    JsParam param = parseParam(line, fileName);
+    if (param == null) {
+      param = tryDoubleLineParam(line, lines, i, fileName);
+    }
+    if (param == null) {
+      LOG.error("Parameter could not be parsed, line:{}, file:{}", line, fileName);
+    } else {
+      doc.getParams().add(param);
+    }
+  }
+
+  private JsParam tryDoubleLineParam(final String line, final String[] lines,
+      final int i, final String fileName) {
+    JsParam jsParam;
+    if (lines.length > i + 1) {
+      final Matcher matcher = COMMENT_PATTERN.matcher(lines[i + 1]);
+      final String nextLine = matcher.find() ? matcher.group(1) : "";
+      if (nextLine.isEmpty()) {
+        jsParam = null;
+      } else {
+        jsParam = parseParam(line + nextLine, fileName);
+      }
+    } else {
+      jsParam = null;
+    }
+    return jsParam;
+  }
+
   private JsParam parseParam(final String line, final String fileName) {
     final Pattern pattern = Pattern.compile("\\{([^\\}]+)\\} +([^ ]+)");
     final Matcher matcher = pattern.matcher(line);
@@ -269,7 +307,6 @@ public class JavaScriptDocParser {
       param.setName(matcher.group(2).trim());
       return param;
     } else {
-      LOG.error("Parameter could not be parsed, line:{}, file:{}", line, fileName);
       return null;
     }
   }
