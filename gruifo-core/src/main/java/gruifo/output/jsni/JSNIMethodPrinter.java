@@ -39,6 +39,9 @@ class JSNIMethodPrinter {
       if (method.isAbstractMethod()) {
         buffer.append("abstract ");
       } else {
+        if (method.isStaticMethod()) {
+          buffer.append("static ");
+        }
         buffer.append("final native ");
       }
       if (method.getGenericType() != null) {

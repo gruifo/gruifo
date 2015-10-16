@@ -14,6 +14,7 @@ public class JMethod {
   private String jsDoc;
   private String genericType;
   private boolean abstractMethod;
+  private boolean staticMethod;
 
   public JMethod(final String classPath, final String functionName, final AccessType accessType) {
     this.classPath = classPath;
@@ -57,6 +58,10 @@ public class JMethod {
     return abstractMethod;
   }
 
+  public boolean isStaticMethod() {
+    return staticMethod;
+  }
+
   public void setAbstract(final boolean abstractMethod) {
     this.abstractMethod = abstractMethod;
   }
@@ -75,5 +80,9 @@ public class JMethod {
 
   public void setReturn(final String returnType) {
     this.returnType = returnType;
+  }
+
+  public void setStatic(final boolean staticMethod) {
+    this.staticMethod = staticMethod;
   }
 }

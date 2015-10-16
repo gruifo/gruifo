@@ -15,7 +15,9 @@
  */
 package gruifo;
 
+import gruifo.lang.js.JsElement;
 import gruifo.lang.js.JsFile;
+import gruifo.lang.js.JsMethod;
 import gruifo.lang.js.JsParam;
 import gruifo.output.FilePrinter;
 import gruifo.output.jsinterface.JsInterfacePrinter;
@@ -73,18 +75,23 @@ public class Controller {
 
   public void run(final FilePrinter printer) {
     final List<JsFile> jsFiles = new ArrayList<>();
+    final List<JsMethod> staticMethods = new ArrayList<>();
+    final Map<String, JsElement> staticConsts = new HashMap<>();
 
     for (final File srcPath : srcPaths) {
       final List<File> files = new ArrayList<>();
       scanJsFiles(files, srcPath);
       for (final File file : files) {
         try {
-          jsFiles.addAll(prepareFiles(parseFile(file.getPath())));
+          jsFiles.addAll(prepareFiles(
+              parseFile(file.getPath(), staticMethods, staticConsts)));
         } catch (final IOException e) {
           LOG.error("Exception parsing file:" + file, e);
         }
       }
     }
+    processStaticConsts(staticConsts);
+    processStaticMethods(staticMethods);
     writeFiles(printer, jsFiles, outputPath);
   }
 
@@ -108,8 +115,19 @@ public class Controller {
     }
   }
 
-  Collection<JsFile> parseFile(final String fileName)
-      throws FileNotFoundException, IOException {
+  /**
+   * 
+   * @param fileName
+   * @param staticMethods
+   * @param staticFields
+   * @return
+   * @throws FileNotFoundException
+   * @throws IOException
+   */
+  Collection<JsFile> parseFile(final String fileName,
+      final List<JsMethod> staticMethods,
+      final Map<String, JsElement> staticFields)
+          throws FileNotFoundException, IOException {
     try (final Reader reader = new FileReader(fileName)) {
       final CompilerEnvirons env = new CompilerEnvirons();
       env.setRecordingLocalJsDocComments(true);
@@ -118,10 +136,17 @@ public class Controller {
       final AstRoot node = new Parser(env).parse(reader, fileName, 1);
       final JavaScriptFileParser parser = new JavaScriptFileParser(fileName);
       node.visitAll(parser);
+      staticMethods.addAll(parser.getStaticMethods());
+      staticFields.putAll(parser.getConsts());
       return parser.getFiles();
     }
   }
 
+  /**
+   * 
+   * @param files
+   * @return
+   */
   Collection<JsFile> prepareFiles(final Collection<JsFile> files) {
     return groupFiles(prepareFields(files));
   }
@@ -150,6 +175,11 @@ public class Controller {
     return files;
   }
 
+  /**
+   * 
+   * @param files
+   * @return
+   */
   Collection<JsFile> groupFiles(final Collection<JsFile> files) {
     final Map<String, JsFile> filesMap = new HashMap<>();
     for (final JsFile jsFile : files) {
@@ -166,6 +196,13 @@ public class Controller {
       }
     }
     return groupedFiles;
+  }
+
+  private void processStaticConsts(final Map<String, JsElement> staticConsts) {
+    LOG.error("Missed #{} static fields.", staticConsts.entrySet().size());
+  }
+  private void processStaticMethods(final List<JsMethod> staticMethods) {
+    LOG.error("Missed #{} static methods.", staticMethods.size());
   }
 
   void writeFiles(final FilePrinter printer, final Collection<JsFile> jsFiles,

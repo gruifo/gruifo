@@ -266,6 +266,7 @@ class Transformer {
         jsMethod.getMethodName(), jsMethod.getAccessType());
     jMethod.setJsDoc(jsMethod.getElement().getJsDoc());
     jMethod.setAbstract(jsMethod.isAbstractMethod());
+    jMethod.setStatic(jsMethod.isStaticMethod());
     setReturnType(jsMethod, jMethod);
     for (final JParam param : params) {
       jMethod.addParam(filterParam(jFile, jMethod, param));
@@ -396,7 +397,7 @@ class Transformer {
   }
 
   private String join(final List<String> list) {
-    final StringBuffer b = new StringBuffer();
+    final StringBuilder b = new StringBuilder();
     boolean first = true;
     for (final String string : list) {
       if (first) {

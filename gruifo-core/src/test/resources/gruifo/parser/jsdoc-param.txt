@@ -14,6 +14,7 @@
  * @param {function(?): ?} listener The listener function.
  * @param {*} any any type
  * @param {?} anyNull any type, no type checking
- * @param {Object.<string, *>}  string_objects
+ * @param {Object.<string, *>} string_objects
+ * @param {Object.<string, string|number>} params parameters.
  * @return {Array.<number>} Resolutions.
  */

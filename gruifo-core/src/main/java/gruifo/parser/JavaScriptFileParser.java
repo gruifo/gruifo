@@ -21,8 +21,10 @@ import gruifo.lang.js.JsMethod;
 import gruifo.lang.js.JsParam;
 import gruifo.output.PrintUtil;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -51,8 +53,11 @@ public class JavaScriptFileParser implements NodeVisitor {
   private static final String PROTOTYPE = "prototype";
   private static final Pattern PROTOTYPE_PATTERN =
       Pattern.compile("((.+)\\.([^\\.]+))\\." + PROTOTYPE + "\\.(.+)");
+  private static final Pattern STATIC_PATTERN =
+      Pattern.compile("(([^\\.]+))\\.(.+)");
   private final Map<String, JsFile> files = new HashMap<>();
   private final Map<String, JsElement> consts = new HashMap<>();
+  private final List<JsMethod> staticMethods = new ArrayList<>();
   private final JavaScriptDocParser parser = new JavaScriptDocParser();
 
   private final String fileName;
@@ -179,12 +184,13 @@ public class JavaScriptFileParser implements NodeVisitor {
 
   private JsMethod addMethod(final String methodOrClassName,
       final JsElement element, final boolean constructor) {
-    final JsMethod method = parseMethod(methodOrClassName, constructor);
+    final JsMethod method =
+        parseMethod(methodOrClassName, element, constructor);
     if (method != null) {
       method.setElement(element);
       final JsFile jsFile = files.get(method.getPackageName());
       if (jsFile == null) {
-        LOG.warn("Class {} not in file:{}", method.getPackageName(), fileName);
+        staticMethods.add(method);
       } else {
         jsFile.addMethod(method);
       }
@@ -206,8 +212,8 @@ public class JavaScriptFileParser implements NodeVisitor {
         jsFile.addField(field);
       }
     } else {
-      LOG.warn("Field didn't match prototype pattern: {} in file:{}",
-          name, fileName);
+      LOG.warn("Field didn't match prototype pattern: {} (type:{}) in file:{}",
+          name, element.getType(), fileName);
     }
   }
 
@@ -220,25 +226,38 @@ public class JavaScriptFileParser implements NodeVisitor {
     return jsFile;
   }
 
-  JsMethod parseMethod(final String name, final boolean constructor) {
+  JsMethod parseMethod(final String name, final JsElement element,
+      final boolean constructor) {
     if (constructor) {
       final int prot = name.lastIndexOf(".") + 1;
       final String methodName = name.substring(prot);
       return new JsMethod(name, methodName);
     } else {
-      return parsePrototypeMethod(name);
+      return parsePrototypeMethod(name, element);
     }
   }
 
-  JsMethod parsePrototypeMethod(final String name) {
-    final Matcher nameMatcher = PROTOTYPE_PATTERN.matcher(name);
+  JsMethod parsePrototypeMethod(final String name, final JsElement element) {
+    JsMethod method = matchMethod(PROTOTYPE_PATTERN, 4, name);
+    if (method == null) {
+      method = matchMethod(STATIC_PATTERN, 2, name);
+      if (method == null) {
+        LOG.error("Missed method {} in: {}", name, fileName);
+      } else {
+        method.setStaticMethod(true);
+      }
+    }
+    return method;
+  }
+
+  private JsMethod matchMethod(final Pattern pattern, final int methodNameIndex,
+      final String name) {
+    final Matcher nameMatcher = pattern.matcher(name);
     if (nameMatcher.find()) {
       final String packageName = nameMatcher.group(1);
-      final String methodName = nameMatcher.group(4);
+      final String methodName = nameMatcher.group(methodNameIndex);
       return new JsMethod(packageName, methodName);
     } else {
-      LOG.warn("Field didn't match prototype pattern: {} in file:{}",
-          name, fileName);
       return null;
     }
   }
@@ -270,42 +289,53 @@ public class JavaScriptFileParser implements NodeVisitor {
     }
   }
 
-
   public Collection<JsFile> getFiles() {
     collectConsts();
     return files.values();
   }
 
-  private void collectConsts() {
-    for (final Entry<String, JsElement> cnst: consts.entrySet()) {
-      addConst(cnst.getKey(), cnst.getValue());
-    }
-    consts.clear();
+  public Map<String, JsElement> getConsts() {
+    return consts;
   }
 
-  private void addConst(final String constName, final JsElement element) {
+  public List<JsMethod> getStaticMethods() {
+    return staticMethods;
+  }
+
+  private void collectConsts() {
+    final List<Entry<String, JsElement>> removed = new ArrayList<>();
+    for (final Entry<String, JsElement> cnst: consts.entrySet()) {
+      if (addConst(cnst.getKey(), cnst.getValue())) {
+        removed.add(cnst);
+      }
+    }
+    consts.entrySet().removeAll(removed);
+  }
+
+  private boolean addConst(final String constName, final JsElement element) {
     final String fullClassName =
         constName.substring(0, constName.lastIndexOf('.'));
+    final boolean added;
     if (files.containsKey(fullClassName)) {
       final JsFile jsFile = files.get(fullClassName);
       jsFile.addField(new JsParam(constName, element));
+      added = true;
     } else {
       final String fullConstName = getFullConstName(fullClassName);
       if (fullConstName.isEmpty()) {
-        LOG.error("Couldn't find class for {} in file:{}", fullClassName,
-            fileName);
+        added = false;
       } else {
         final JsFile cjsFile;
         if (files.containsKey(fullConstName)) {
           cjsFile = files.get(fullConstName);
+          cjsFile.addField(new JsParam(constName, element));
+          added = true;
         } else {
-          final JsElement jsfElement = new JsElement();
-          cjsFile = parseClassOrInterfaceName(fullConstName, false, jsfElement);
-          files.put(fullConstName, cjsFile);
+          added = false;
         }
-        cjsFile.addField(new JsParam(constName, element));
       }
     }
+    return added;
   }
 
   private String getFullConstName(final String fullClassName) {

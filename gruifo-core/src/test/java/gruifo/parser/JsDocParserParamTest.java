@@ -33,7 +33,7 @@ public class JsDocParserParamTest extends JsDocParserTestBase {
 
   @Test
   public void testParam() {
-    assertEquals("params size", 15, jsElement.getParams().size());
+    assertEquals("params size", 16, jsElement.getParams().size());
     assertEquals("params 0 name",
         "options", jsElement.getParams().get(0).getName());
     assertEquals("params 0 type", "nl.Options",

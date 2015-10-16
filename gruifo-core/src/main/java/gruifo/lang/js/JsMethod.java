@@ -21,6 +21,7 @@ public class JsMethod {
 
   private JsElement element;
   private boolean abstractMethod;
+  private boolean staticMethod;
   private String methodName;
   private final String packageName;
 
@@ -49,6 +50,10 @@ public class JsMethod {
     return abstractMethod;
   }
 
+  public boolean isStaticMethod() {
+    return staticMethod;
+  }
+
   public void setAbstract(final boolean abstractMethod) {
     this.abstractMethod = abstractMethod;
   }
@@ -59,5 +64,9 @@ public class JsMethod {
 
   public void setMethodName(final String methodName) {
     this.methodName = methodName;
+  }
+
+  public void setStaticMethod(final boolean staticMethod) {
+    this.staticMethod = staticMethod;
   }
 }
