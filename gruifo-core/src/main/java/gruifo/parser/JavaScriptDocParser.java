@@ -160,7 +160,7 @@ public class JavaScriptDocParser {
   private static final Pattern ANNOTATION_PATTERN =
       Pattern.compile("@([^ ]+) ?.*");
   private static final Pattern COMMENT_PATTERN =
-      Pattern.compile("^ *[^ ]+(.*)");
+      Pattern.compile("^ *\\* *([^@]+)");
 
   private final JsTypeParser jsTypeParser = new JsTypeParser();
   private final JsDocTypedefParser typedefParser =
@@ -290,7 +290,7 @@ public class JavaScriptDocParser {
       if (nextLine.isEmpty()) {
         jsParam = null;
       } else {
-        jsParam = parseParam(line + nextLine, fileName);
+        jsParam = parseParam(line + ' ' + nextLine, fileName);
       }
     } else {
       jsParam = null;
