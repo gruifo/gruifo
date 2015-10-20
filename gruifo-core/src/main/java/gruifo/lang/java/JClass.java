@@ -58,6 +58,7 @@ public class JClass {
   private String extendsType;
   private String classGeneric;
   private boolean dataClass;
+  private boolean _interface;
 
   public JClass(final String packageName, final String className) {
     this.packageName = packageName;
@@ -161,6 +162,10 @@ public class JClass {
     return dataClass;
   }
 
+  public boolean isInterface() {
+    return this._interface;
+  }
+
   public boolean isStatic() {
     return staticClass;
   }
@@ -184,6 +189,10 @@ public class JClass {
 
   public void setHeaderComment(final String headerComment) {
     this.headerComment = headerComment;
+  }
+
+  public void setInterface(final boolean _interface) {
+    this._interface = _interface;
   }
 
   public void setStatic(final boolean staticClass) {

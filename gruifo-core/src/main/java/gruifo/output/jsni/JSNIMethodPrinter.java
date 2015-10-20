@@ -29,21 +29,12 @@ class JSNIMethodPrinter {
   public void printMethods(final StringBuffer buffer, final int indent,
       final JClass jFile) {
     for (final JMethod method : jFile.getMethods()) {
-      if (method.isAbstractMethod()) {
+      if (method.isAbstractMethod() && !jFile.isInterface()) {
         continue;
       }
-      //TODO print method with multi arguments a|b
       PrintUtil.indent(buffer, method.getJsDoc(), indent);
       PrintUtil.indent(buffer, indent);
-      buffer.append(appendAccessType(method.getAccessType()));
-      if (method.isAbstractMethod()) {
-        buffer.append("abstract ");
-      } else {
-        if (method.isStaticMethod()) {
-          buffer.append("static ");
-        }
-        buffer.append("final native ");
-      }
+      printModifiers(buffer, jFile, method);
       if (method.getGenericType() != null) {
         buffer.append('<');
         buffer.append(method.getGenericType());
@@ -57,7 +48,7 @@ class JSNIMethodPrinter {
       buffer.append('(');
       printMethodParam(buffer, method, true);
       buffer.append(')');
-      if (method.isAbstractMethod()) {
+      if (method.isAbstractMethod() || jFile.isInterface()) {
         buffer.append(';');
       } else {
         buffer.append(" /*-{");
@@ -67,6 +58,21 @@ class JSNIMethodPrinter {
         buffer.append("}-*/;");
       }
       PrintUtil.nl2(buffer);
+    }
+  }
+
+  private void printModifiers(final StringBuffer buffer, final JClass jFile,
+      final JMethod method) {
+    if (!jFile.isInterface()) {
+      buffer.append(appendAccessType(method.getAccessType()));
+      if (method.isAbstractMethod()) {
+        buffer.append("abstract ");
+      } else {
+        if (method.isStaticMethod()) {
+          buffer.append("static ");
+        }
+        buffer.append("final native ");
+      }
     }
   }
 

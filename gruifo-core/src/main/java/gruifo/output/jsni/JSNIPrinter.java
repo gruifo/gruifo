@@ -23,6 +23,7 @@ import gruifo.output.PrintUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -37,7 +38,6 @@ public class JSNIPrinter implements FilePrinter {
   private final JSNIMethodPrinter mPrinter = new JSNIMethodPrinter();
   private final JSNIFieldPrinter fPrinter = new JSNIFieldPrinter();
   private final JSNIEnumPrinter ePrinter = new JSNIEnumPrinter();
-
 
   @Override
   public String printFile(final JsFile jsFile) {
@@ -96,7 +96,8 @@ public class JSNIPrinter implements FilePrinter {
     PrintUtil.nl2(buffer);
   }
 
-  private void printImports(final StringBuffer buffer, final Set<String> imports) {
+  private void printImports(final StringBuffer buffer,
+      final Set<String> imports) {
     final ArrayList<String> importList = new ArrayList<>(imports);
     Collections.sort(importList);
     for (final String imp : importList) {
@@ -111,34 +112,65 @@ public class JSNIPrinter implements FilePrinter {
   private void printClass(final StringBuffer buffer, final JClass jFile,
       final int indent) {
     PrintUtil.indent(buffer, indent);
-    buffer.append("public ");
-    if (jFile.isStatic()) {
-      buffer.append("static ");
-    }
-    if (jFile.hasAbstractMethods()) {
-      buffer.append("abstract ");
-    }
-    buffer.append("class ");
+    printClassInterfaceModifier(buffer, jFile);
     buffer.append(jFile.getClassOrInterfaceName());
-    printClassExtend(buffer, jFile.getClassGeneric());
-    if (jFile instanceof JClass && jFile.getExtends() != null) {
-      buffer.append(" extends ");
-      buffer.append(jFile.getExtends());
-    }
-    if (!jFile.getImplements().isEmpty()) {
-      LOG.error("TODO generate 'implements' in {}", jFile.getFullClassName());
-    }
+    printClassGeneric(buffer, jFile.getClassGeneric());
+    printClassExtends(buffer, jFile);
+    printImplements(buffer, jFile.getImplements());
     buffer.append(" {");
     PrintUtil.nl(buffer);
   }
 
-  private void printClassExtend(final StringBuffer buffer, final String classGeneric) {
+  private void printClassInterfaceModifier(final StringBuffer buffer,
+      final JClass jFile) {
+    buffer.append("public ");
+    if (jFile.isInterface()) {
+      buffer.append("interface ");
+    } else {
+      if (jFile.isStatic()) {
+        buffer.append("static ");
+      }
+      if (jFile.hasAbstractMethods()) {
+        buffer.append("abstract ");
+      }
+      buffer.append("class ");
+    }
+  }
+
+  private void printClassGeneric(final StringBuffer buffer,
+      final String classGeneric) {
     if (classGeneric != null) {
       buffer.append('<');
       buffer.append(classGeneric);
       buffer.append(" extends ");
       buffer.append(TypeMapper.GWT_JAVA_SCRIPT_OBJECT);
       buffer.append("> ");
+    }
+  }
+
+  private void printClassExtends(final StringBuffer buffer,
+      final JClass jFile) {
+    if (jFile instanceof JClass && jFile.getExtends() != null
+        && !jFile.isInterface()) {
+      buffer.append(" extends ");
+      buffer.append(jFile.getExtends());
+    }
+  }
+
+  private void printImplements(final StringBuffer buffer,
+      final List<String> implementss) {
+    if (!implementss.isEmpty()) {
+      buffer.append(" implements");
+      boolean first = true;
+      for (final String implString : implementss) {
+        if (first) {
+          first = false;
+        } else {
+          buffer.append(',');
+        }
+        buffer.append(' ');
+        buffer.append(implString);
+      }
     }
   }
 
@@ -155,7 +187,7 @@ public class JSNIPrinter implements FilePrinter {
         }
       }
     }
-    if (!jFile.isDataClass()) {
+    if (!jFile.isDataClass() && !jFile.isInterface()) {
       printConstructor(
           buffer, indent, "protected", jFile.getClassOrInterfaceName());
     }
@@ -165,7 +197,7 @@ public class JSNIPrinter implements FilePrinter {
       final JClass jFile, final JMethod constructor) {
     PrintUtil.indent(buffer, indent);
     buffer.append("public static native ");
-    printClassExtend(buffer, jFile.getClassGeneric());
+    printClassGeneric(buffer, jFile.getClassGeneric());
     buffer.append(jFile.getClassOrInterfaceName());
     if (jFile.getClassGeneric() != null) {
       buffer.append('<');

@@ -207,6 +207,7 @@ public class JavaScriptDocParser {
         doc.addImplements(parseType(line, fileName));
         break;
       case INHERITDOC:
+        //if @inheritDoc from an interface it should generate the method.
       case OVERRIDE:
         doc.setOverride();
         break;

@@ -49,6 +49,7 @@ class Transformer {
   public JClass transform(final JsFile jsFile) {
     final JClass jFile =
         new JClass(jsFile.getPackageName(), jsFile.getClassOrInterfaceName());
+    jFile.setInterface(jsFile.isInterface());
     addImports(jFile);
     jFile.setClassDescription(jsFile.getElement().getJsDoc());
     for (final JsFile subFile: jsFile.getInnerJFiles()) {

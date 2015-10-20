@@ -26,10 +26,12 @@ public class JSNIFieldPrinter {
 
   public void printFields(final StringBuffer buffer, final int indent,
       final JClass jFile) {
-    for (final JParam field : jFile.getFields()) {
-      printGetter(buffer, indent, field);
-      if (!field.isFinal()) {
-        printSetter(buffer, indent, field);
+    if (!jFile.isInterface()) {
+      for (final JParam field : jFile.getFields()) {
+        printGetter(buffer, indent, field);
+        if (!field.isFinal()) {
+          printSetter(buffer, indent, field);
+        }
       }
     }
   }
