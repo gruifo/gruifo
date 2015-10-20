@@ -24,6 +24,8 @@ import gruifo.lang.js.JsMethod;
 import gruifo.lang.js.JsParam;
 import gruifo.lang.js.JsType;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,6 +52,7 @@ class Transformer {
     final JClass jFile =
         new JClass(jsFile.getPackageName(), jsFile.getClassOrInterfaceName());
     jFile.setInterface(jsFile.isInterface());
+    addHeader(jFile, jsFile.getOriginalFileName());
     addImports(jFile);
     jFile.setClassDescription(jsFile.getElement().getJsDoc());
     for (final JsFile subFile: jsFile.getInnerJFiles()) {
@@ -67,6 +70,21 @@ class Transformer {
     transformFields(jFile, jsFile.getFields());
     transformMethods(jsFile, jFile);
     return jFile;
+  }
+
+  private void addHeader(final JClass jFile, final String orgFilename) {
+    String canonicalPath;
+    try {
+      canonicalPath = new File(orgFilename).getCanonicalPath();
+    } catch (final IOException e) {
+      canonicalPath = orgFilename;
+    }
+    final String header = "/*\n"
+        + " * This file was generated with gruifo.\n"
+        + " * You probably don't want to edit this file.\n"
+        + " * Generated from: " + canonicalPath + "\n"
+        + " */\n\n";
+    jFile.setHeaderComment(header);
   }
 
   private void transformEnumFields(final JClass jFile, final JsType enumType,
