@@ -34,7 +34,6 @@ import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.Assignment;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
-import org.mozilla.javascript.ast.Block;
 import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.Name;
@@ -42,7 +41,6 @@ import org.mozilla.javascript.ast.NodeVisitor;
 import org.mozilla.javascript.ast.ObjectLiteral;
 import org.mozilla.javascript.ast.ObjectProperty;
 import org.mozilla.javascript.ast.PropertyGet;
-import org.mozilla.javascript.ast.Scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +50,7 @@ public class JavaScriptFileParser implements NodeVisitor {
 
   private static final String PROTOTYPE = "prototype";
   private static final Pattern PROTOTYPE_PATTERN =
-      Pattern.compile("((.+)\\.([^\\.]+))\\." + PROTOTYPE + "\\.(.+)");
+      Pattern.compile("((.+\\.)?([^\\.]+))\\." + PROTOTYPE + "\\.(.+)");
   private static final Pattern STATIC_PATTERN =
       Pattern.compile("(([^\\.]+))\\.(.+)");
   private final Map<String, JsFile> files = new HashMap<>();
@@ -68,53 +66,66 @@ public class JavaScriptFileParser implements NodeVisitor {
 
   @Override
   public boolean visit(final AstNode node) {
-    if (node.getType() == Token.ASSIGN) {
-      visitAssignment((Assignment) node);
-    } else if (node.getType() == Token.CONST) {
-      LOG.error("FIXME: Const node detected, not parsed in file:{}" , fileName);
-    } else {
-      checkAndAddTypedef(node);
+    if (isRootNode(node)) {
+      if (node.getType() == Token.ASSIGN) {
+        visitAssignment((Assignment) node);
+      } else if (node.getType() == Token.CONST) {
+        LOG.error("FIXME:Const node detected, not parsed in file:{}", fileName);
+      } else {
+        visitOtherNode(node);
+      }
     }
     return true;
   }
 
+
   private void visitAssignment(final Assignment node) {
-    if (node.getRight() instanceof FunctionNode) {
-      // only visit functions at root node, not functions inside other
-      // functions.
-      if (node.getParent() instanceof ExpressionStatement
-          && node.getLeft() instanceof PropertyGet
-          && isRootNode(node.getParent())) {
+    if (node.getLeft() instanceof PropertyGet) {
+      visitAssignmentAtRoot(node);
+    }
+  }
+
+  private void visitAssignmentAtRoot(final Assignment node) {
+    if (node.getRight() instanceof FunctionNode
+        || ingoreAbstractMethod(node)) {
+      if (node.getParent() instanceof ExpressionStatement) {
         try {
           visitMethodOrClass(((PropertyGet) node.getLeft()).toSource(),
-              node.getJsDoc(), (FunctionNode) node.getRight());
+              node.getJsDoc());
+          if (node.getRight() instanceof PropertyGet) {
+            LOG.info("left:{}, right:{}",
+                ((PropertyGet) node.getLeft()).toSource(),
+                ((PropertyGet) node.getRight()).toSource());
+          }
         } catch (final ClassCastException e) {
           LOG.error("Node different then expcected in file:{},", fileName, e);
         }
       } else {
-        LOG.debug("Node at linenr {} ignored in file:{}",
-            node.getLineno(), fileName);
+        //        LOG.debug("Node at linenr {} ignored in file:{}",
+        //            node.getLineno(), fileName);
       }
-    } else if (node.getParent() instanceof ExpressionStatement
-        && node.getLeft() instanceof PropertyGet
-        && isRootNode(node.getParent())) {
+    } else if (node.getParent() instanceof ExpressionStatement) {
       visitMethodOrEnum(((PropertyGet) node.getLeft()).toSource(),
           node.getJsDoc(), node.getRight());
     }
   }
 
-  private boolean isRootNode(final AstNode parent) {
-    return !(parent.getParent() instanceof Block
-        || (parent.getParent() instanceof Scope
-            && ((Scope) (parent.getParent())).getParentScope()
-            instanceof FunctionNode));
+  private boolean ingoreAbstractMethod(final Assignment node) {
+    return node.getRight() instanceof PropertyGet
+        && !"goog.abstractMethod".equals(
+            ((PropertyGet) node.getRight()).toSource());
   }
 
-  private void visitMethodOrEnum(final String enumName, final String jsDoc,
+  private boolean isRootNode(final AstNode node) {
+    return node.getParent() != null
+        && node.getParent().getParent() instanceof AstRoot;
+  }
+
+  private void visitMethodOrEnum(final String name, final String jsDoc,
       final AstNode astNode) {
     if (jsDoc == null) {
       //TODO sometimes values are recognized as enums even if they are not.
-      //      LOG.error("Comment in enum {} for file {} is empty.", enumName, fileName);
+      LOG.error("Comment in node {} for file {} is empty.", name, fileName);
       return;
     }
     final JsElement element = parser.parse(fileName, jsDoc);
@@ -122,9 +133,9 @@ public class JavaScriptFileParser implements NodeVisitor {
       return; // ignore private stuff...
     }
     if (element.isEnum()) {
-      final JsFile jsFile = parseClassOrInterfaceName(enumName, false, element);
+      final JsFile jsFile = parseClassOrInterfaceName(name, false, element);
 
-      files.put(enumName, jsFile);
+      files.put(name, jsFile);
       if (astNode instanceof ObjectLiteral) {
         final ObjectLiteral ol = (ObjectLiteral) astNode;
         for (final ObjectProperty op : ol.getElements()) {
@@ -132,24 +143,24 @@ public class JavaScriptFileParser implements NodeVisitor {
           jsFile.addEnumValue(left.toSource(), left.getJsDoc());
         }
       }
-    } else if (isMethod(enumName, element)) {
+    } else if (isMethod(name, element)) {
       //method assigned as method variable.
-      final JsMethod method = addMethod(enumName, element, false);
+      final JsMethod method = addMethod(name, element, false);
       if (method == null) {
-        LOG.warn("Should this be abstract: {} in file:{}", enumName, fileName);
+        LOG.warn("Should this be abstract: {} in file:{}", name, fileName);
       } else {
         method.setAbstract(true);
       }
     } else if (element.isConst() || element.isDefine()){
-      consts.put(enumName, element);
+      consts.put(name, element);
     } else {
-      LOG.warn("We missed something: {}: {} in file:{}", enumName, element,
+      LOG.warn("We missed something: {}: {} in file:{}", name, element,
           fileName);
     }
   }
 
   private void visitMethodOrClass(final String methodOrClassName,
-      final String jsDoc, final FunctionNode right) {
+      final String jsDoc) {
     if (jsDoc == null) {
       LOG.error("Comment in for {} is empty in file:{}", methodOrClassName,
           fileName);
@@ -182,11 +193,24 @@ public class JavaScriptFileParser implements NodeVisitor {
     }
   }
 
+  /**
+   * Add as method.
+   * 
+   * If it's an @interface it's parsed as method, but should not be added as
+   * method.
+   * 
+   * if no file object could be found then it's a static method, do it's added
+   * to the global list of static methods.
+   * @param methodOrClassName
+   * @param element
+   * @param constructor
+   * @return
+   */
   private JsMethod addMethod(final String methodOrClassName,
       final JsElement element, final boolean constructor) {
     final JsMethod method =
         parseMethod(methodOrClassName, element, constructor);
-    if (method != null) {
+    if (method != null && !element.isInterface()) {
       method.setElement(element);
       final JsFile jsFile = files.get(method.getPackageName());
       if (jsFile == null) {
@@ -266,10 +290,9 @@ public class JavaScriptFileParser implements NodeVisitor {
     return functionName.indexOf(PROTOTYPE) > 0 || element.isMethod();
   }
 
-  private void checkAndAddTypedef(final AstNode node) {
+  private void visitOtherNode(final AstNode node) {
     if (node instanceof PropertyGet
-        && node.getParent() instanceof ExpressionStatement
-        && node.getParent().getParent() instanceof AstRoot) {
+        && node.getParent() instanceof ExpressionStatement) {
       if (node.getJsDoc() == null) {
         LOG.error("Node {} has empty comment in file:{}",
             node.toSource(), fileName);
