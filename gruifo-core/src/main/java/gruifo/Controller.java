@@ -20,7 +20,7 @@ import gruifo.lang.js.JsFile;
 import gruifo.lang.js.JsMethod;
 import gruifo.lang.js.JsParam;
 import gruifo.output.FilePrinter;
-import gruifo.output.jsinterface.JsInterfacePrinter;
+import gruifo.output.jsinterop.JsInteropPrinter;
 import gruifo.output.jsni.JSNIPrinter;
 import gruifo.parser.JavaScriptFileParser;
 
@@ -63,7 +63,7 @@ public class Controller {
   public void run(final OutputType outputType) {
     final FilePrinter fp;
     if (outputType == OutputType.JSI) {
-      fp = new JsInterfacePrinter();
+      fp = new JsInteropPrinter();
     } else if (outputType == OutputType.JSNI) {
       fp = new JSNIPrinter();
     } else {

@@ -16,7 +16,7 @@
 package gruifo;
 
 import gruifo.output.FilePrinter;
-import gruifo.output.jsinterface.JsInterfacePrinter;
+import gruifo.output.jsinterop.JsInteropPrinter;
 import gruifo.output.jsni.JSNIPrinter;
 import gruifo.output.jsni.TypeMapper;
 
@@ -49,8 +49,8 @@ public final class GruifoCli {
 
   private static FilePrinter detectFilePrinter(final CmdOptions cmdOptions) {
     final FilePrinter fp;
-    if (cmdOptions.isJSInterface()) {
-      fp = new JsInterfacePrinter();
+    if (cmdOptions.isJSInterop()) {
+      fp = new JsInteropPrinter();
     } else {
       fp = new JSNIPrinter();
     }

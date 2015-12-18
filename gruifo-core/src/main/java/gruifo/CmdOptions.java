@@ -39,7 +39,7 @@ class CmdOptions {
 
   private static final String HELP = "help";
   private static final String JSNI = "JSNI";
-  private static final String JSINTERFACE = "JSI";
+  private static final String JSINTEROP = "JSI";
   private static final String SRC_PATH = "src";
   private static final String SRC_PATH_ARG = "directory;...";
   private static final String TARGET_PATH = "target";
@@ -51,8 +51,8 @@ class CmdOptions {
       new Option(HELP, "print this message");
   private static final Option JSNI_OPTION =
       new Option(JSNI, "generate JSNI files");
-  private static final Option JSINTERFACE_OPTION =
-      new Option(JSINTERFACE, "generate JSInterface files");
+  private static final Option JSINTEROP_OPTION =
+      new Option(JSINTEROP, "generate JSInterop files");
   private static final Option SRC_PATH_OPTION =
       new Option(SRC_PATH, true, "one or more ; separated source directories");
   private static final Option TARGET_PATH_OPTION =
@@ -67,7 +67,7 @@ class CmdOptions {
     options = new Options();
     options.addOption(HELP_OPTION);
     options.addOption(JSNI_OPTION);
-    options.addOption(JSINTERFACE_OPTION);
+    options.addOption(JSINTEROP_OPTION);
     SRC_PATH_OPTION.setArgName(SRC_PATH_ARG);
     SRC_PATH_OPTION.setRequired(true);
     options.addOption(SRC_PATH_OPTION);
@@ -118,8 +118,8 @@ class CmdOptions {
     return props;
   }
 
-  public boolean isJSInterface() {
-    return cmd.hasOption(JSINTERFACE);
+  public boolean isJSInterop() {
+    return cmd.hasOption(JSINTEROP);
   }
 
   /**

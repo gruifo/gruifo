@@ -29,8 +29,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//TODO @interface should be printed as real interface not as class.
-//
+/**
+ * 
+ */
 public class JSNIPrinter implements FilePrinter {
   private static final Logger LOG = LoggerFactory.getLogger(JSNIPrinter.class);
 

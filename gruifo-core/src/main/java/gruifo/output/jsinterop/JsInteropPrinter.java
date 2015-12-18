@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package gruifo.output.jsinterface;
+package gruifo.output.jsinterop;
 
 import gruifo.lang.java.JClass;
 import gruifo.lang.js.JsFile;
@@ -22,8 +22,8 @@ import gruifo.output.FilePrinter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
-
-public class JsInterfacePrinter implements FilePrinter {
+// https://docs.google.com/document/d/10fmlEYIHcyead_4R1S5wKGs1t2I7Fnp_PaNaa7XTEk0/edit?pli=1
+public class JsInteropPrinter implements FilePrinter {
 
   private static final String GWT_JS_PACKAGE = "com.google.gwt.core.client.js";
 
