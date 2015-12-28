@@ -19,7 +19,8 @@ nl.test.SomeClass = function(opt_options) {
 nl.test.SomeClass.SOME_ID = 1;
 
 /**
- * Method with no JavaScript body.
+ * Function with no implementation, known use case that override super function.
+ * This function should not result in generated java code.
  * @function
  * @return {nl.test.SomeClass} SomeClass.
  * @api stable

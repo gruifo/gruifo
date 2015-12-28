@@ -15,11 +15,20 @@
  */
 package gruifo.output.jsni;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import gruifo.GruifoCli;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.tools.JavaCompiler;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 
 import org.apache.commons.cli.ParseException;
 
@@ -45,8 +54,36 @@ public abstract class BaseJsTest {
         "-type_mapping", typeMappingFile, });
   }
 
-  public final void assertJavaFileExists(final String file) {
-    final File targetFile = new File(targetPath, file + ".java");
+  protected void assertJavaFileExists(final String file) {
+    final File targetFile = getJavaSourceFile(file);
     assertTrue("targetFile doesn't exist:" + targetFile, targetFile.exists());
+  }
+
+  protected void assertCompile(final String file) throws IOException {
+    final File fileToCompile = getJavaSourceFile(file);
+    final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+    assertNotNull("No compiler installed", compiler);
+    final List<String> options = new ArrayList<>();
+    options.add("-classpath");
+    final StringBuilder sb = new StringBuilder();
+    final URLClassLoader urlClassLoader =
+        (URLClassLoader) Thread.currentThread().getContextClassLoader();
+    for (final URL url : urlClassLoader.getURLs())
+      sb.append(url.getFile()).append(File.pathSeparator);
+    options.add(sb.toString());
+    final StandardJavaFileManager fileManager =
+        compiler.getStandardFileManager(null,null,null);
+    final JavaCompiler.CompilationTask task = compiler.getTask(
+        /*default System.err*/ null,
+        /*std file manager*/ null,
+        /*std DiagnosticListener */  null,
+        /*compiler options*/ options,
+        /*no annotation*/  null,
+        fileManager.getJavaFileObjects(fileToCompile));
+    assertTrue("Compilation Failed", task.call());
+  }
+
+  private File getJavaSourceFile(final String file) {
+    return new File(targetPath, file + ".java");
   }
 }
