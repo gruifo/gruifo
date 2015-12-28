@@ -37,10 +37,6 @@ public class JavaScriptDocParser {
    */
   private static final String API = "api";
   /**
-   * Annotation: @class
-   */
-  private static final String CLASS = "class";
-  /**
    * Annotation: @classdesc
    */
   private static final String CLASSDESC = "classdesc";
@@ -178,10 +174,6 @@ public class JavaScriptDocParser {
       final String line = lines[i];
       final String annotation = findAnnotation(line);
       switch(annotation) {
-      case CLASS:
-        //doc.setClass();
-        LOG.error("dectected @class in file {}", fileName);
-        break;
       case CLASSDESC:
         doc.setClassDesc();
         break;

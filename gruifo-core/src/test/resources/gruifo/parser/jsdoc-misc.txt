@@ -1,13 +1,12 @@
 /**
  * This is a comment with misc annotations.
  * @api
- * @class
  * @classdesc
  * @constructor
  * @fires nl.Event
  * @inheritDoc
  * @observable
- * @Override
+ * @override
  * @private
  * @protected
  * @return {nl.Object|undefined}
