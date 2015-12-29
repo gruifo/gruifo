@@ -22,12 +22,19 @@ import org.junit.Test;
 
 public class InterfaceTest extends BaseJsTest {
 
+  private static final String JAVA_CLASS = "nl/test/SomeInterface";
+
   public InterfaceTest() throws IOException, ParseException {
-    super("test_interface");
+    super("test_interface", JAVA_CLASS);
   }
 
   @Test
   public void testGeneratedFile() {
-    assertJavaFileExists("nl/test/SomeInterface");
+    assertJavaFileExists(JAVA_CLASS);
+  }
+
+  @Test
+  public void testCompile() throws IOException {
+    assertCompile(JAVA_CLASS);
   }
 }

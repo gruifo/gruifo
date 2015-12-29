@@ -22,12 +22,19 @@ import org.junit.Test;
 
 public class AbstractClassTest extends BaseJsTest {
 
+  private static final String JAVA_CLASS = "nl/test/SomeClassAbstract";
+
   public AbstractClassTest() throws IOException, ParseException {
-    super("test_abstract_class");
+    super("test_abstract_class", JAVA_CLASS);
   }
 
   @Test
   public void testGeneratedFile() {
-    assertJavaFileExists("nl/test/SomeClassAbstract");
+    assertJavaFileExists(JAVA_CLASS);
+  }
+
+  @Test
+  public void testCompile() throws IOException {
+    assertCompile(JAVA_CLASS);
   }
 }

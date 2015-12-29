@@ -3,9 +3,9 @@
  * Complete JavaScript class example
  *
  * @constructor
- * @extends {nl.test.SomeClassAbstract}
+ * @extends {java.util.ArrayList}
  * @fires nl.test.Event
- * @param {nl.test.SomeClassOptions=} opt_options Options.
+ * @param {java.util.ArrayList=} opt_options Options.
  * @api stable
  */
 nl.test.SomeClass = function(opt_options) {

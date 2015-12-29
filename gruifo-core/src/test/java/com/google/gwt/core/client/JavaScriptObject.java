@@ -13,28 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package gruifo.output.jsni;
+package com.google.gwt.core.client;
 
-import java.io.IOException;
+/**
+ * Dummy implementation of GWT JavaScriptObject to be able to compile tests.
+ */
+public class JavaScriptObject {
 
-import org.apache.commons.cli.ParseException;
-import org.junit.Test;
-
-public class TypedefTest extends BaseJsTest {
-
-  private static final String JAVA_CLASS = "nl/test/SomeTypedef";
-
-  public TypedefTest() throws IOException, ParseException {
-    super("test_typedef", JAVA_CLASS);
-  }
-
-  @Test
-  public void testGeneratedFile() {
-    assertJavaFileExists(JAVA_CLASS);
-  }
-
-  @Test
-  public void testCompile() throws IOException {
-    assertCompile(JAVA_CLASS);
-  }
 }

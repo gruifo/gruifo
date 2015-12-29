@@ -14,3 +14,24 @@ nl.test.SomeProperty = {
   MIN_RESOLUTION: 'minResolution',
   SOURCE: 'source'
 };
+
+/**
+ * @classdesc
+ * @constructor
+ * @api stable
+ */
+nl.test.ALPHABET = function() {
+}
+
+/**
+ * @const
+ * @enum {number}
+ */
+nl.test.ALPHABET.Greek = {
+  ALFA: 1,
+  BETA: 2,
+  GAMMA: 3,
+  DELTA: 4,
+  EPSILON: 5,
+  ZET: 6
+};

@@ -21,8 +21,6 @@ import gruifo.GruifoCli;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,12 +35,18 @@ public abstract class BaseJsTest {
 
   private final String jsFileName;
   private final String targetPath;
+  private final boolean[] compileResult;
 
-  public BaseJsTest(final String jsFileName) throws IOException, ParseException {
+  public BaseJsTest(final String jsFileName, final String... javaFiles)
+      throws IOException, ParseException {
     this.jsFileName = jsFileName;
     targetPath = getClass().getProtectionDomain()
         .getCodeSource().getLocation().getFile();
     parse();
+    compileResult = new boolean[javaFiles.length];
+    for (int i = 0; i < javaFiles.length; i++) {
+      compileResult[i] = compile(javaFiles[i]);
+    }
   }
 
   private void parse() throws IOException, ParseException {
@@ -59,18 +63,17 @@ public abstract class BaseJsTest {
     assertTrue("targetFile doesn't exist:" + targetFile, targetFile.exists());
   }
 
-  protected void assertCompile(final String file) throws IOException {
+  private boolean compile(final String file) {
     final File fileToCompile = getJavaSourceFile(file);
     final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
     assertNotNull("No compiler installed", compiler);
     final List<String> options = new ArrayList<>();
+    options.add("-source");
+    options.add("1.6");
+    options.add("-Xlint:-options");
     options.add("-classpath");
-    final StringBuilder sb = new StringBuilder();
-    final URLClassLoader urlClassLoader =
-        (URLClassLoader) Thread.currentThread().getContextClassLoader();
-    for (final URL url : urlClassLoader.getURLs())
-      sb.append(url.getFile()).append(File.pathSeparator);
-    options.add(sb.toString());
+    options.add(getClass().getProtectionDomain()
+        .getCodeSource().getLocation().getFile());
     final StandardJavaFileManager fileManager =
         compiler.getStandardFileManager(null,null,null);
     final JavaCompiler.CompilationTask task = compiler.getTask(
@@ -80,7 +83,13 @@ public abstract class BaseJsTest {
         /*compiler options*/ options,
         /*no annotation*/  null,
         fileManager.getJavaFileObjects(fileToCompile));
-    assertTrue("Compilation Failed", task.call());
+    return task.call();
+  }
+
+  protected void assertCompile(final String... javaFiles) throws IOException {
+    for (int i = 0; i < javaFiles.length; i++) {
+      assertTrue("Compilation Failed for:" + javaFiles[i], compileResult[i]);
+    }
   }
 
   private File getJavaSourceFile(final String file) {
