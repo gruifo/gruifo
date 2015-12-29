@@ -98,7 +98,7 @@ public class JavaScriptFileParser implements NodeVisitor {
                 ((PropertyGet) node.getRight()).toSource());
           }
         } catch (final ClassCastException e) {
-          LOG.error("Node different then expcected in file:{},", fileName, e);
+          LOG.error("Node different then expected in file:{},", fileName, e);
         }
       } else {
         //        LOG.debug("Node at linenr {} ignored in file:{}",
@@ -195,10 +195,10 @@ public class JavaScriptFileParser implements NodeVisitor {
 
   /**
    * Add as method.
-   * 
+   *
    * If it's an @interface it's parsed as method, but should not be added as
    * method.
-   * 
+   *
    * if no file object could be found then it's a static method, do it's added
    * to the global list of static methods.
    * @param methodOrClassName

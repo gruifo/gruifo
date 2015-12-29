@@ -116,7 +116,7 @@ public class Controller {
   }
 
   /**
-   * 
+   *
    * @param fileName
    * @param staticMethods
    * @param staticFields
@@ -143,7 +143,7 @@ public class Controller {
   }
 
   /**
-   * 
+   *
    * @param files
    * @return
    */
@@ -176,7 +176,7 @@ public class Controller {
   }
 
   /**
-   * 
+   *
    * @param files
    * @return
    */
@@ -199,10 +199,14 @@ public class Controller {
   }
 
   private void processStaticConsts(final Map<String, JsElement> staticConsts) {
-    LOG.error("Missed #{} static fields.", staticConsts.entrySet().size());
+    if (!staticConsts.isEmpty()) {
+      LOG.error("Missed #{} static fields.", staticConsts.size());
+    }
   }
   private void processStaticMethods(final List<JsMethod> staticMethods) {
-    LOG.error("Missed #{} static methods.", staticMethods.size());
+    if (!staticMethods.isEmpty()) {
+      LOG.error("Missed #{} static methods.", staticMethods.size());
+    }
   }
 
   void writeFiles(final FilePrinter printer, final Collection<JsFile> jsFiles,
