@@ -20,6 +20,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Data class containing the transformed JavaScript class as a Java class.
+ */
 public class JClass {
 
   public static class EnumValue {
@@ -197,5 +200,11 @@ public class JClass {
 
   public void setStatic(final boolean staticClass) {
     this.staticClass = staticClass;
+  }
+
+  @Override
+  public String toString() {
+    return "JClass [packageName=" + packageName + ", classOrInteraceName="
+        + classOrInteraceName + "]";
   }
 }

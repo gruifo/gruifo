@@ -16,7 +16,8 @@ public class JMethod {
   private boolean abstractMethod;
   private boolean staticMethod;
 
-  public JMethod(final String classPath, final String functionName, final AccessType accessType) {
+  public JMethod(final String classPath, final String functionName,
+      final AccessType accessType) {
     this.classPath = classPath;
     methodName = functionName;
     this.accessType = accessType;
@@ -84,5 +85,10 @@ public class JMethod {
 
   public void setStatic(final boolean staticMethod) {
     this.staticMethod = staticMethod;
+  }
+
+  @Override
+  public String toString() {
+    return "JMethod [methodName=" + methodName + "]";
   }
 }

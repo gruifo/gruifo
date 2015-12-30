@@ -17,6 +17,9 @@ package gruifo.lang.js;
 
 import gruifo.lang.AccessType;
 
+/**
+ * Data class to store the JavaScript method data.
+ */
 public class JsMethod {
 
   private JsElement element;
@@ -68,5 +71,12 @@ public class JsMethod {
 
   public void setStaticMethod(final boolean staticMethod) {
     this.staticMethod = staticMethod;
+  }
+
+  @Override
+  public String toString() {
+    return "JsMethod [element=" + element + ", abstractMethod="
+        + abstractMethod + ", staticMethod=" + staticMethod + ", methodName="
+        + methodName + ", packageName=" + packageName + "]";
   }
 }
