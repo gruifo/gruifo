@@ -266,17 +266,24 @@ class Transformer {
     final List<JParam> splitParams = new ArrayList<>();
     for (final JsType innerJsParam : jsParam.getType().getChoices()) {
       final String transformedType = transformType(innerJsParam, true);
-      boolean duplicate = false;
+      if (!isDuplicate(splitParams, transformedType)) {
+        splitParams.add(new JParam(jsParam.getName(), transformedType));
+      }
+    }
+    return splitParams;
+  }
+
+  private boolean isDuplicate(final List<JParam> splitParams,
+      final String transformedType) {
+    boolean duplicate = false;
+    if (transformedType != null) {
       for (final JParam jParam : splitParams) {
         if (transformedType.equals(jParam.getType())) {
           duplicate = true;
         }
       }
-      if (!duplicate) {
-        splitParams.add(new JParam(jsParam.getName(), transformedType));
-      }
     }
-    return splitParams;
+    return duplicate;
   }
 
   private JMethod transformMethod(final JClass jFile, final JsMethod jsMethod,
