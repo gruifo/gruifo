@@ -347,18 +347,22 @@ class Transformer {
       if (jsType.getChoices().isEmpty()) {
         //        LOG.error("Type empty: {}", jsType);
         //        types.add(TypeMapper.GWT_JAVA_SCRIPT_OBJECT);
-        types.add(transformType(jsType, true));
+        types.add(tranformVarargs(jsType, transformType(jsType, true)));
       } else {
         final List<String> sTypes = tranformTypeList(jsType, jsType.getChoices());
         for (final String type : sTypes) {
-          types.add(type + (jsType.isVarArgs() ? "..." : ""));
+          types.add(tranformVarargs(jsType, type));
         }
         //transformType(jsType.getTypes().get(0), false)
       }
     } else {
-      types.add(mapRawType);
+      types.add(tranformVarargs(jsType, mapRawType));
     }
     return types;
+  }
+
+  private String tranformVarargs(final JsType jsType, final String type) {
+    return type + (jsType.isVarArgs() ? "..." : "");
   }
 
   private String transformSingleType(final JsType jsType) {

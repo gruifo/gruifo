@@ -57,6 +57,13 @@ nl.test.SomeClass.prototype.getSomeField = function() {
 };
 
 /**
+ * Method with var args parameter.
+ * @param {...number} returns a number.
+ */
+nl.test.SomeClass.prototype.getSomeVagArgMethod = function() {
+};
+
+/**
  * Method with no parameters, returns a function 
  * @return {function(nl.test.SomeClass): number|null|undefined} some function
  */
