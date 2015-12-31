@@ -86,13 +86,13 @@ public class JSNIFieldPrinter {
     buffer.append('(');
     buffer.append(field.getType());
     buffer.append(' ');
-    printFieldName(buffer, field);
+    printFieldAsVar(buffer, field);
     buffer.append(") /*-{");
     PrintUtil.nl(buffer);
     PrintUtil.indent(buffer, indent + 1);
     printFieldVariable(buffer, field);
     buffer.append(" = ");
-    printFieldName(buffer, field);
+    printFieldAsVar(buffer, field);
     buffer.append(';');
     PrintUtil.nl(buffer);
     PrintUtil.indent(buffer, indent);
@@ -101,13 +101,20 @@ public class JSNIFieldPrinter {
   }
 
   private void printFieldName(final StringBuffer buffer, final JParam field) {
-    final String name = field.getName();
+    buffer.append(PrintUtil.firstCharUpper(getFieldName(field)));
+  }
+
+  private void printFieldAsVar(final StringBuffer buffer, final JParam field) {
+    buffer.append(PrintUtil.firstCharLower(getFieldName(field)));
+  }
+
+  private String getFieldName(final JParam field) {
+    String name = field.getName();
     if (field.isStatic()) {
       final int classSep = name.lastIndexOf('.');
-      buffer.append(name.substring(classSep + 1));
-    } else {
-      buffer.append(PrintUtil.firstCharUpper(name));
+      name = name.substring(classSep + 1);
     }
+    return name;
   }
 
   private void printFieldVariable(final StringBuffer buffer, final JParam field) {
