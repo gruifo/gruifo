@@ -28,10 +28,10 @@ nl.test.SomeClass.SOME_ID = 1;
 nl.test.SomeClass.prototype.getSomething;
 
 /**
- * Method with 3 parameters.
+ * Method with 3 parameters, where the last is optional.
  * @param {number} first first parameter.
  * @param {number} second second parameter.
- * @param {number} third third parameter.
+ * @param {number=} third third parameter.
  */
 nl.test.SomeClass.prototype.setSomeFunction3 = function(first, second, third) {
   this.set(first, second, third);
