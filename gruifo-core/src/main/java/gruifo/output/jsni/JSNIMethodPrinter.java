@@ -127,25 +127,4 @@ class JSNIMethodPrinter {
   private boolean isVoidType(final JMethod method) {
     return "void".equals(method.getReturn());
   }
-
-  // enum types should be print as follows:
-  //  /**
-  //   * Drawing type ('Point', 'LineString', 'Polygon', 'MultiPoint',
-  //   * 'MultiLineString', or 'MultiPolygon').
-  //   * @type {ol.geom.GeometryType}
-  //   * @api
-  //   */
-  //  public final native ol.geom.GeometryType getType() /*-{
-  //    return @ol.geom.GeometryType::getGeometryType(Ljava/lang/String;)(this['type']);
-  //  }-*/;
-  //
-  //  /**
-  //   * Drawing type ('Point', 'LineString', 'Polygon', 'MultiPoint',
-  //   * 'MultiLineString', or 'MultiPolygon').
-  //   * @type {ol.geom.GeometryType}
-  //   * @api
-  //   */
-  //  public final native void setType(ol.geom.GeometryType type) /*-{
-  //    this['type'] = type.@ol.geom.GeometryType::getValue()();
-  //  }-*/;
 }
