@@ -22,19 +22,20 @@ import org.junit.Test;
 
 public class EnumTest extends BaseJsTest {
 
-  private static final String JAVA_CLASS = "nl/test/SomeProperty";
+  private static final String[] JAVA_CLASSES =
+    { "nl/test/SomeProperty", "nl/test/ALPHABET", };
 
   public EnumTest() throws IOException, ParseException {
-    super("test_enum", JAVA_CLASS);
+    super("test_enum", JAVA_CLASSES);
   }
 
   @Test
   public void testGeneratedFile() {
-    assertJavaFileExists(JAVA_CLASS);
+    assertJavaFileExists(JAVA_CLASSES);
   }
 
   @Test
   public void testCompile() throws IOException {
-    assertCompile(JAVA_CLASS);
+    assertCompile(JAVA_CLASSES);
   }
 }

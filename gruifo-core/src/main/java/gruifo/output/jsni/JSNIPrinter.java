@@ -69,7 +69,8 @@ public class JSNIPrinter implements FilePrinter {
       printJClass(jFile, indent, buffer);
     } else {
       ePrinter.printEnum(buffer, indent, jFile.getPackageName(),
-          jFile.getClassOrInterfaceName(), jFile.getEnumValues());
+          jFile.getClassOrInterfaceName(), jFile.isStatic(),
+          jFile.getEnumValues());
     }
     PrintUtil.nl(buffer);
     buffer.append('}'); // close file

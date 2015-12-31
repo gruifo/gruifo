@@ -21,89 +21,109 @@ import gruifo.output.PrintUtil;
 import java.util.List;
 
 /**
- * Prints JavaScipt @enum annotated code as Java enum objects.
+ * Prints JavaScript @enum {[type]} annotated code. This code looks like a map
+ * with keys and values. However, it's a class with variables and initialized
+ * with a specific value. Where the variable is like a key. For example:
+ * <pre>
+ * /**
+ *  * @enum {number}
+ *  * /
+ * MyEnum = {
+ *   A: 1,
+ *   B: 2
+ * };
+ * </pre>
+ * 
+ * In Java the enum keys are represented by static fields that are initialized
+ * with a call to a native method. The method returns the JavaScript key.
+ * The code makes use of the fact that while Java is typed the compiled
+ * JavaScript is not. Thus in Java the return type is cast to a class, while
+ * it just is value of the enum key. In Java you can code with the specific
+ * class, while in the compiled code this information is stripped and just uses
+ * the JavaScript key.
+ * <pre>
+ * public class MyEnum extends JavaScriptObject {
+ * 
+ *   public static final MyEnum A = createA();
+ * 
+ *   private static final native createA() /*-{
+ *     return $wnd.MyEnum.A;
+ *   * /-};
+ *
+ *   protected MyEnum { }
+ * 
+ *   public static final native double value() /*-{ return this; }-* /;
+ * }
+ * </pre>
+ * The actual enum value can be accessed via <code>value()</code>.
  */
 public class JSNIEnumPrinter {
 
   public void printEnum(final StringBuffer buffer, final int indent,
       final String packageName, final String enumName,
-      final List<EnumValue> enumValues) {
-    buffer.append("public enum ");
+      final boolean _static, final List<EnumValue> enumValues) {
+    PrintUtil.indent(buffer, indent);
+    buffer.append("public ");
+    if (_static) {
+      buffer.append("static ");
+    }
+    buffer.append("class ");
     buffer.append(enumName);
+    buffer.append(" extends ");
+    buffer.append(TypeMapper.GWT_JAVA_SCRIPT_OBJECT);
     buffer.append(" {");
     PrintUtil.nl(buffer);
-    printEnumContent(buffer, indent + 1, packageName, enumName, enumValues);
+    printEnumValues(buffer, indent + 1, packageName, enumName, enumValues);
+    printConstructor(buffer, indent + 1, enumName);
+    printValueMethod(buffer, indent + 1, enumValues.get(0).getType());
   }
 
-  private void printEnumContent(final StringBuffer buffer, final int indent,
+  private void printEnumValues(final StringBuffer buffer, final int indent,
       final String packageName, final String enumName,
       final List<EnumValue> enumValues) {
-    boolean first = true;
     for (final EnumValue enumValue : enumValues) {
-      if (first) {
-        first = false;
-      } else {
-        buffer.append(',');
-        PrintUtil.nl(buffer);
-      }
-      PrintUtil.indent(buffer, enumValue.getJavaDoc(), indent);
-      PrintUtil.indent(buffer, indent);
-      buffer.append(enumValue.getName());
-      buffer.append(" {");
+      final String name = enumValue.getName();
+      PrintUtil.nlIndent(buffer, indent);
+      buffer.append("public static final ");
+      buffer.append(enumName);
+      buffer.append(' ');
+      buffer.append(name);
+      buffer.append(" = create");
+      buffer.append(name);
+      buffer.append("();");
+      PrintUtil.nl(buffer);
+      PrintUtil.nlIndent(buffer, indent);
+      buffer.append("private static final native ");
+      buffer.append(enumName);
+      buffer.append(" create");
+      buffer.append(name);
+      buffer.append("() /*-{");
       PrintUtil.nlIndent(buffer, indent + 1);
-      buffer.append("@Override");
-      PrintUtil.nlIndent(buffer, indent + 1);
-      buffer.append("public native final ");
-      buffer.append(enumValue.getType());
-      buffer.append(" getValue() /*-{");
-      PrintUtil.nlIndent(buffer, indent + 2);
       buffer.append("return $wnd.");
       buffer.append(packageName + "." + enumName);
       buffer.append('.');
-      buffer.append(enumValue.getName());
+      buffer.append(name);
       buffer.append(';');
-      PrintUtil.nlIndent(buffer, indent + 1);
-      buffer.append("}-*/;");
       PrintUtil.nlIndent(buffer, indent);
-      buffer.append('}');
-    }
-    if (!enumValues.isEmpty()) {
-      buffer.append(';');
-      PrintUtil.nl2(buffer);
-      printMethods(buffer, indent, enumName, enumValues.get(0).getType());
+      buffer.append("}-*/;");
+      PrintUtil.nl(buffer);
     }
   }
 
-  private void printMethods(final StringBuffer buffer, final int indent,
-      final String enumName, final String enumType) {
-    PrintUtil.indent(buffer, indent);
-    buffer.append("public abstract " + enumType + " getValue();");
-    PrintUtil.nl2(buffer);
-    PrintUtil.indent(buffer, indent);
-    buffer.append("public static ");
-    buffer.append(enumName);
-    buffer.append(" getEnumFromValue(final ");
-    buffer.append(enumType);
-    buffer.append(" value) {");
-    PrintUtil.nlIndent(buffer, indent+1);
-    buffer.append("for (final " + enumName + " e : values()) {");
-    PrintUtil.nlIndent(buffer, indent+2);
-    buffer.append("if (");
-    if (TypeMapper.INSTANCE.isPrimitive(enumType)) {
-      buffer.append("e.getValue() == value");
-    } else {
-      buffer.append("e.getValue().equals(value)");
-    }
-    buffer.append(") {");
-    PrintUtil.nlIndent(buffer, indent+3);
-    buffer.append("return e;");
-    PrintUtil.nlIndent(buffer, indent+2);
-    buffer.append("}");
-    PrintUtil.nlIndent(buffer, indent+1);
-    buffer.append("}");
-    PrintUtil.nlIndent(buffer, indent+1);
-    buffer.append("return null;");
+  private void printConstructor(final StringBuffer buffer, final int indent,
+      final String enumName) {
     PrintUtil.nlIndent(buffer, indent);
-    buffer.append("}");
+    buffer.append("protected ");
+    buffer.append(enumName);
+    buffer.append("() {}");
+    PrintUtil.nlIndent(buffer, indent);
+  }
+
+  private void printValueMethod(final StringBuffer buffer, final int indent,
+      final String type) {
+    PrintUtil.nlIndent(buffer, indent);
+    buffer.append("public final native ");
+    buffer.append(type);
+    buffer.append(" value() /*-{ return this; }-*/;");
   }
 }

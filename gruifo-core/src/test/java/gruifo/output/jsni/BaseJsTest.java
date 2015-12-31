@@ -58,9 +58,11 @@ public abstract class BaseJsTest {
         "-type_mapping", typeMappingFile, });
   }
 
-  protected void assertJavaFileExists(final String file) {
-    final File targetFile = getJavaSourceFile(file);
-    assertTrue("targetFile doesn't exist:" + targetFile, targetFile.exists());
+  protected void assertJavaFileExists(final String... files) {
+    for (final String file : files) {
+      final File targetFile = getJavaSourceFile(file);
+      assertTrue("targetFile doesn't exist:" + targetFile, targetFile.exists());
+    }
   }
 
   private boolean compile(final String file) {
