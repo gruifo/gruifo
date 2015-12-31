@@ -82,7 +82,7 @@ class Transformer {
     final String header = "/*\n"
         + " * This file was generated with gruifo.\n"
         + " * You probably don't want to edit this file.\n"
-        + " * Generated from: " + canonicalPath + "\n"
+        + " * Generated from: " + canonicalPath.replace('\\', '/') + "\n"
         + " */\n\n";
     jFile.setHeaderComment(header);
   }
