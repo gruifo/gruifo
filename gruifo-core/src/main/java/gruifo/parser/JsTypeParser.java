@@ -69,6 +69,7 @@ public class JsTypeParser {
     int startPos = idx.get();
     int startPosChoices = startPos;
     int nameEndPos = startPos;
+    int parentheses = 0;
     int endPos;
     boolean notNull = false, canNull = false, optional = false, varArgs = false,
         newType = false, decreaseDepth = false, inFunction = false,
@@ -83,10 +84,15 @@ public class JsTypeParser {
       case 'f':
         if (rawType.substring(i).startsWith(FUNCTION)) {
           inFunction = true;
+          parentheses++;
         }
         break;
+      case '(':
+        parentheses++;
+        break;
       case ')':
-        endFunction = true;
+        parentheses--;
+        endFunction = parentheses == 0;
         break;
       case ' ':
         if (startPos == endPos) {

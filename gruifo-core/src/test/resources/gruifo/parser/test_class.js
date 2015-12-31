@@ -75,7 +75,9 @@ nl.test.SomeClass.prototype.getSomeFunction = function() {
  * Method with function parameter. no return.
  * @param {function(nl.test.SomeClass):number|null|undefined} someFunction
  *     Render order.
+ * @param {function(this: S, (java.util.ArrayList|java.util.List), java.util.ArrayList): T}
+ *     callback Feature callback.
  */
-nl.test.SomeClass.prototype.setSomeFunction = function(someFunction) {
+nl.test.SomeClass.prototype.setSomeFunction = function(someFunction, callback) {
   this.set(someFunction);
 };
